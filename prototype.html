@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潮鉴社 · 高保真原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;background:#0a0a0f;color:#1a1a2e;overflow:hidden;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+input{font-family:inherit;outline:none;border:none;}
+img{display:block;max-width:100%;}
+:root{
+  --blue:#0E2A6E;--blue-2:#1A3CA8;--blue-soft:#EAF0FF;
+  --orange:#FF6A2C;--orange-2:#FF8A4C;
+  --red:#FF3B3B;--green:#22C55E;--gold:#F5B50A;
+  --ink:#1a1a2e;--ink-2:#5a5a6e;--ink-3:#9a9aae;
+  --line:#ECEEF3;--bg:#F4F5F9;--card:#FFFFFF;
+  --radius:16px;--shadow:0 6px 20px rgba(20,30,80,.08);--shadow-strong:0 10px 30px rgba(20,30,80,.18);
+}
+/* 手机外框 */
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#1c1c28,#0a0a0f 70%);}
+.phone{position:relative;width:393px;height:852px;background:#000;border-radius:54px;box-shadow:0 0 0 12px #1a1a22,0 0 0 14px #2a2a36,0 40px 80px rgba(0,0,0,.6),0 0 60px rgba(40,60,160,.25);flex-shrink:0;}
+.phone::before{content:"";position:absolute;left:-2px;top:120px;width:4px;height:32px;background:#2a2a36;border-radius:2px 0 0 2px;}
+.phone::after{content:"";position:absolute;left:-2px;top:170px;width:4px;height:62px;background:#2a2a36;border-radius:2px 0 0 2px;box-shadow:0 86px 0 #2a2a36;}
+.vol-r{position:absolute;right:-2px;top:150px;width:4px;height:80px;background:#2a2a36;border-radius:0 2px 2px 0;}
+.screen{position:absolute;inset:8px;border-radius:46px;overflow:hidden;background:var(--bg);}
+/* 状态栏 + 灵动岛 */
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:15px;font-weight:600;color:#000;z-index:60;pointer-events:none;}
+.statusbar.on-dark{color:#fff;}
+.statusbar .time{font-variant-numeric:tabular-nums;}
+.statusbar .icons{display:flex;gap:6px;align-items:center;}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:36px;background:#000;border-radius:20px;z-index:61;}
+.island::after{content:"";position:absolute;right:14px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:#1a1a22;box-shadow:inset 0 0 0 2px #2a2a36;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:#000;border-radius:3px;z-index:60;opacity:.9;}
+/* 页面系统 */
+.pages{position:absolute;inset:0;}
+.page{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);}
+.page.active{display:flex;animation:pageIn .35s cubic-bezier(.22,.61,.36,1);}
+@keyframes pageIn{from{opacity:.4;transform:translateX(8px);}to{opacity:1;transform:none;}}
+.page.slide{animation:slideIn .35s cubic-bezier(.22,.61,.36,1);}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:none;}}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;}
+.scroll::-webkit-scrollbar{display:none;}
+/* 通用顶部栏 */
+.navbar{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#fff;border-bottom:1px solid var(--line);position:relative;z-index:5;}
+.navbar.on-blue{background:var(--blue);border-bottom:none;}
+.navbar .nb-title{font-size:17px;font-weight:700;}
+.navbar .nb-back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink);}
+.nb-actions{display:flex;gap:14px;align-items:center;}
+.nb-actions .act{font-size:20px;}
+/* Tab 栏 */
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:83px;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;padding-bottom:20px;z-index:50;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink-3);font-size:10px;}
+.tab .ico{font-size:22px;line-height:1;}
+.tab.active{color:var(--blue);}
+.tab.active .ico{color:var(--orange);}
+
+/* 通用组件 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:24px;font-weight:600;padding:10px 18px;font-size:14px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:var(--orange);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-ghost{background:var(--blue-soft);color:var(--blue);}
+.btn-line{border:1.5px solid var(--blue);color:var(--blue);background:#fff;}
+.btn-block{display:flex;width:100%;padding:14px;font-size:15px;border-radius:28px;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.tag-red{background:var(--red);color:#fff;}
+.tag-blue{background:var(--blue);color:#fff;}
+.tag-gold{background:var(--gold);color:#3a2400;}
+.tag-orange{background:var(--orange);color:#fff;}
+.tag-green{background:var(--green);color:#fff;}
+.tag-soft{background:var(--blue-soft);color:var(--blue);}
+.verified-badge{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(90deg,var(--blue),var(--blue-2));color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:0 8px 8px 0;}
+.student-badge{display:inline-flex;align-items:center;gap:3px;background:var(--orange);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;}
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:80;display:none;align-items:flex-end;justify-content:center;}
+.overlay.show{display:flex;animation:fade .25s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.sheet{background:#fff;width:100%;border-radius:24px 24px 0 0;padding:18px 20px 28px;max-height:80%;overflow-y:auto;animation:sheetUp .3s cubic-bezier(.22,.61,.36,1);}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:none;}}
+.sheet-handle{width:40px;height:5px;background:#ddd;border-radius:3px;margin:0 auto 14px;}
+.sheet-title{font-size:17px;font-weight:700;text-align:center;margin-bottom:14px;}
+.toast{position:absolute;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:10px 18px;border-radius:24px;font-size:13px;z-index:90;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+.home-top{background:linear-gradient(180deg,var(--blue),#0a1f54);padding:54px 14px 12px;color:#fff;}
+.home-top .brand-row{display:flex;align-items:center;gap:8px;}
+.home-top .logo{font-size:20px;font-weight:800;letter-spacing:.5px;}
+.home-top .camp-tag{font-size:9px;background:var(--orange);padding:2px 6px;border-radius:4px;font-weight:600;}
+.home-top .top-icons{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:18px;}
+.search-box{margin-top:10px;background:rgba(255,255,255,.16);border-radius:22px;display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;color:rgba(255,255,255,.8);}
+.search-box input{flex:1;background:transparent;color:#fff;}
+.search-box input::placeholder{color:rgba(255,255,255,.7);}
+.banner{margin:12px;border-radius:18px;overflow:hidden;height:150px;position:relative;}
+.banner-track{display:flex;height:100%;transition:transform .5s;}
+.banner-slide{min-width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;color:#fff;position:relative;}
+.banner-slide .b-title{font-size:18px;font-weight:800;}
+.banner-slide .b-sub{font-size:12px;opacity:.9;margin-top:3px;}
+.banner-dots{position:absolute;bottom:10px;right:16px;display:flex;gap:5px;}
+.banner-dots span{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.5);}
+.banner-dots span.on{width:16px;background:#fff;}
+.luck-roll{margin:0 12px 8px;background:#fff;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);overflow:hidden;}
+.luck-roll .icon{color:var(--orange);font-size:16px;}
+.luck-roll .roll-wrap{flex:1;overflow:hidden;height:20px;}
+.luck-roll .roll-inner{animation:rollUp 8s infinite;}
+.luck-roll .roll-item{height:20px;line-height:20px;font-size:12px;color:var(--ink-2);white-space:nowrap;}
+.luck-roll .roll-item b{color:var(--red);}
+@keyframes rollUp{0%,15%{transform:translateY(0);}20%,35%{transform:translateY(-20px);}40%,55%{transform:translateY(-40px);}60%,75%{transform:translateY(-60px);}80%,95%{transform:translateY(-80px);}}
+.grid4{margin:0 12px;background:#fff;border-radius:16px;padding:14px 8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;box-shadow:var(--shadow);}
+.grid4 .item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);}
+.grid4 .item .gi{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.grid4 .item:nth-child(1) .gi{background:#FFF0E6;}
+.grid4 .item:nth-child(2) .gi{background:#E8F4FF;}
+.grid4 .item:nth-child(3) .gi{background:#F0EAFF;}
+.grid4 .item:nth-child(4) .gi{background:#E8FFF3;}
+.sec-title{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;}
+.sec-title h3{font-size:16px;font-weight:800;}
+.sec-title .more{font-size:12px;color:var(--ink-3);}
+.newbie{margin:0 12px;border-radius:16px;background:linear-gradient(90deg,#FF6A2C,#FF9A4C);padding:14px;color:#fff;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);}
+.newbie .nb-l{flex:1;}
+.newbie .nb-l .t1{font-size:14px;font-weight:800;}
+.newbie .nb-l .t2{font-size:11px;opacity:.9;margin-top:2px;}
+.newbie .countdown{font-variant-numeric:tabular-nums;font-weight:800;font-size:13px;}
+.newbie-cards{display:flex;gap:10px;padding:8px 12px 4px;overflow-x:auto;}
+.newbie-cards::-webkit-scrollbar{display:none;}
+.nc-card{min-width:108px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.nc-card .nc-img{height:96px;display:flex;align-items:center;justify-content:center;font-size:40px;}
+.nc-card .nc-info{padding:8px;}
+.nc-card .nc-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nc-card .nc-price{font-size:13px;color:var(--orange);font-weight:800;margin-top:2px;}
+.hero-card{margin:0 12px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:var(--shadow);}
+.hero-img{height:170px;position:relative;display:flex;align-items:center;justify-content:center;font-size:70px;}
+.hero-img .flash{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;animation:flash 1.4s infinite;}
+@keyframes flash{0%,100%{opacity:1;}50%{opacity:.5;}}
+.hero-info{padding:12px;}
+.hero-info .h-name{font-size:15px;font-weight:800;}
+.hero-info .h-sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.hero-info .h-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.hero-info .h-price{font-size:18px;font-weight:800;color:var(--orange);}
+.hero-info .h-price small{font-size:11px;font-weight:400;color:var(--ink-3);text-decoration:line-through;margin-left:4px;}
+.hero-thumbs{display:flex;gap:6px;padding:0 12px 10px;overflow-x:auto;}
+.hero-thumbs::-webkit-scrollbar{display:none;}
+.hero-thumbs .ht{min-width:62px;height:62px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;background:#f7f7fb;}
+.cat-tabs{display:flex;gap:18px;padding:8px 16px;overflow-x:auto;border-bottom:1px solid var(--line);background:#fff;margin:0 12px;border-radius:12px 12px 0 0;}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tabs .ct{font-size:14px;color:var(--ink-2);white-space:nowrap;padding:6px 0;position:relative;}
+.cat-tabs .ct.on{color:var(--blue);font-weight:800;}
+.cat-tabs .ct.on::after{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--orange);border-radius:2px;}
+.cat-panel{background:#fff;margin:0 12px;border-radius:0 0 12px 12px;padding:12px;}
+.ip-block{border-radius:14px;padding:12px;margin-bottom:12px;}
+.ip-block .ip-h{display:flex;align-items:center;justify-content:space-between;color:#fff;margin-bottom:10px;}
+.ip-block .ip-h .ipn{font-size:15px;font-weight:800;}
+.ip-block .ip-big{height:120px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:8px;}
+.ip-block .ip-row{display:flex;gap:6px;}
+.ip-block .ip-row .ips{flex:1;height:64px;border-radius:8px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:26px;}
+.play-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.play-card{border-radius:14px;padding:12px;height:96px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;}
+.play-card .pn{font-size:14px;font-weight:800;}
+.play-card .pd{font-size:10px;opacity:.9;}
+.play-card .pe{font-size:24px;}
+.show-wall{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 16px;}
+.show-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.show-card .sc-img{height:130px;display:flex;align-items:center;justify-content:center;font-size:54px;position:relative;}
+.show-card .sc-img .lv{position:absolute;top:6px;left:6px;background:var(--gold);color:#3a2400;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;}
+.show-card .sc-info{padding:8px;}
+.show-card .sc-name{font-size:11px;font-weight:600;line-height:1.3;}
+.show-card .sc-user{font-size:10px;color:var(--ink-3);margin-top:4px;display:flex;align-items:center;gap:3px;}
+.ranks{display:flex;gap:8px;padding:8px 12px;overflow-x:auto;}
+.ranks::-webkit-scrollbar{display:none;}
+.ranks .rk{min-width:120px;border-radius:12px;padding:10px;color:#fff;}
+.ranks .rk .rt{font-size:12px;font-weight:800;}
+.ranks .rk .ri{font-size:11px;opacity:.9;margin-top:2px;}
+
+/* ===== 抽盒玩法 ===== */
+.play-head{background:linear-gradient(180deg,var(--blue),#0a1f54);padding:54px 14px 14px;color:#fff;}
+.play-head .ph-top{display:flex;align-items:center;gap:10px;}
+.play-head .ph-back{font-size:22px;}
+.play-head .ph-title{flex:1;font-size:16px;font-weight:800;}
+.play-head .ph-acts{display:flex;gap:14px;font-size:18px;}
+.play-mode-tag{margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:var(--orange);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:18px;}
+.countdown-bar{margin:12px;background:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;}
+.countdown-bar .cl{font-size:12px;color:var(--ink-2);}
+.countdown-bar .cl b{color:var(--red);}
+.countdown-bar .cd-time{font-variant-numeric:tabular-nums;font-weight:800;color:var(--red);font-size:18px;}
+.box-cabinet{margin:0 12px;background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+.box-cabinet .bc-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;}
+.box-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.box-cell{aspect-ratio:1;border-radius:12px;background:linear-gradient(135deg,#FFE7D6,#FFD0B0);display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;border:2px solid transparent;}
+.box-cell.sold{background:#eee;filter:grayscale(1) opacity(.5);}
+.box-cell.sold::after{content:"已售";position:absolute;font-size:10px;color:#999;}
+.box-cell.selected{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,44,.2);}
+.box-cell .qmark{position:absolute;top:4px;right:6px;font-size:14px;color:#fff;background:var(--blue);border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.ship-tip{margin:10px 12px;background:var(--blue-soft);color:var(--blue);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;}
+
+.grade-section{margin:0 12px 12px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.grade-h{padding:10px 14px;font-weight:800;font-size:13px;display:flex;justify-content:space-between;background:linear-gradient(90deg,#FFF3E6,#fff);}
+.grade-list .gl-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line);}
+.grade-list .gl-item .gimg{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;background:#f5f5fa;flex-shrink:0;}
+.grade-list .gl-item .ginfo{flex:1;}
+.grade-list .ginfo .gn{font-size:13px;font-weight:700;}
+.grade-list .ginfo .gd{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.grade-list .gqty{font-size:11px;color:var(--orange);font-weight:700;}
+.grade-list .gtop{background:linear-gradient(90deg,#FFE9D6,#FFF3E6);}
+.record-roll{margin:0 12px 12px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:var(--shadow);font-size:12px;height:44px;overflow:hidden;}
+.record-roll .rrl{height:22px;line-height:22px;color:var(--ink-2);}
+.record-roll .rrl b{color:var(--red);}
+.pool-bar{margin:12px;background:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);}
+.pool-bar .pb-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;}
+.pool-bar .pb-top b{color:var(--blue);}
+.pool-prog{height:8px;background:#eee;border-radius:4px;overflow:hidden;}
+.pool-prog i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));width:62%;}
+.prize-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 12px;}
+.prize-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.prize-card .pc-img{height:88px;display:flex;align-items:center;justify-content:center;font-size:42px;background:#f7f7fb;position:relative;}
+.prize-card .pc-img .lv-tag{position:absolute;top:6px;left:6px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;color:#fff;}
+.prize-card .pc-info{padding:8px;}
+.prize-card .pc-name{font-size:12px;font-weight:600;}
+.prize-card .pc-meta{font-size:10px;color:var(--ink-3);margin-top:2px;display:flex;justify-content:space-between;}
+.prize-card.gone{opacity:.45;}
+.prize-card.gone .pc-img::after{content:"售罄";position:absolute;inset:0;background:rgba(0,0,0,.4);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.ming-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 12px;}
+.ming-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.ming-card .mc-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:50px;background:#f7f7fb;}
+.ming-card .mc-info{padding:10px;}
+.ming-card .mc-name{font-size:13px;font-weight:600;}
+.ming-card .mc-price{font-size:15px;color:var(--orange);font-weight:800;margin-top:4px;}
+.float-side{position:absolute;right:10px;bottom:140px;display:flex;flex-direction:column;gap:8px;z-index:30;}
+.float-side .fs{width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:var(--shadow-strong);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--blue);}
+.action-bar{position:absolute;bottom:0;left:0;right:0;background:#fff;padding:10px 14px calc(10px + 20px);border-top:1px solid var(--line);display:flex;gap:10px;z-index:40;}
+.action-bar .ab-btn{flex:1;padding:13px;border-radius:26px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:5px;}
+
+/* ===== 商品详情 ===== */
+.pd-banner{height:340px;background:linear-gradient(135deg,#FFE7D6,#FFD0B0);display:flex;align-items:center;justify-content:center;font-size:120px;position:relative;}
+.pd-banner .pd-back{position:absolute;top:54px;left:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.pd-banner .pd-acts{position:absolute;top:54px;right:14px;display:flex;gap:8px;}
+.pd-banner .pd-acts .a{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.pd-info{background:#fff;padding:14px 16px;border-radius:18px 18px 0 0;margin-top:-18px;position:relative;z-index:2;}
+.pd-price-row{display:flex;align-items:baseline;gap:8px;}
+.pd-price-row .pp{font-size:26px;font-weight:800;color:var(--orange);}
+.pd-price-row .pp-old{font-size:13px;color:var(--ink-3);text-decoration:line-through;}
+.pd-name{font-size:17px;font-weight:800;margin-top:6px;}
+.pd-sub{font-size:12px;color:var(--ink-3);margin-top:4px;}
+.pd-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.verified-bar{margin:10px 16px;background:linear-gradient(90deg,var(--blue),var(--blue-2));color:#fff;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;}
+.verified-bar .vb-i{font-size:30px;}
+.verified-bar .vb-t{flex:1;}
+.verified-bar .vb-t .vt1{font-size:14px;font-weight:800;}
+.verified-bar .vb-t .vt2{font-size:11px;opacity:.9;margin-top:2px;}
+.verified-bar .vb-go{font-size:20px;}
+.pd-section{margin:10px 16px;background:#fff;border-radius:14px;padding:14px;}
+.pd-section h4{font-size:14px;font-weight:800;margin-bottom:10px;}
+.spec-row{display:flex;gap:8px;flex-wrap:wrap;}
+.spec-row .sp{padding:8px 14px;border-radius:10px;background:#f5f5fa;font-size:12px;font-weight:600;}
+.spec-row .sp.on{background:var(--blue);color:#fff;}
+.pd-story{font-size:12px;color:var(--ink-2);line-height:1.7;}
+.pd-action{position:absolute;bottom:0;left:0;right:0;background:#fff;padding:8px 14px calc(8px + 20px);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;z-index:40;}
+.pd-action .pa-ico{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--ink-2);gap:2px;}
+.pd-action .pa-cart{flex:1;background:var(--blue-soft);color:var(--blue);border-radius:26px;padding:13px;font-weight:700;font-size:14px;text-align:center;}
+.pd-action .pa-buy{flex:1;background:var(--orange);color:#fff;border-radius:26px;padding:13px;font-weight:700;font-size:14px;text-align:center;}
+/* ===== IP 图鉴 ===== */
+.guide-top{background:linear-gradient(180deg,var(--blue),#0a1f54);padding:54px 14px 14px;color:#fff;}
+.guide-top .gt-title{font-size:18px;font-weight:800;}
+.guide-top .gt-sub{font-size:11px;opacity:.8;margin-top:2px;}
+.guide-search{margin-top:10px;background:rgba(255,255,255,.16);border-radius:22px;display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;color:rgba(255,255,255,.8);}
+.guide-search input{flex:1;background:transparent;color:#fff;}
+.guide-search input::placeholder{color:rgba(255,255,255,.7);}
+.guide-cats{display:flex;gap:14px;padding:10px 16px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line);}
+.guide-cats::-webkit-scrollbar{display:none;}
+.guide-cats .gc{font-size:13px;color:var(--ink-2);white-space:nowrap;padding:4px 0;}
+.guide-cats .gc.on{color:var(--blue);font-weight:800;border-bottom:2px solid var(--orange);}
+.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;}
+.ip-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
+.ip-card .ic-cover{height:130px;display:flex;align-items:center;justify-content:center;font-size:62px;position:relative;}
+.ip-card .ic-cover .vbadge{position:absolute;top:8px;left:8px;}
+.ip-card .ic-info{padding:10px;}
+.ip-card .ic-name{font-size:13px;font-weight:800;}
+.ip-card .ic-meta{font-size:10px;color:var(--ink-3);margin-top:3px;}
+.ip-prog{height:5px;background:#eee;border-radius:3px;margin-top:8px;overflow:hidden;}
+.ip-prog i{display:block;height:100%;background:var(--orange);}
+.ip-card .ic-prog-t{font-size:10px;color:var(--ink-2);margin-top:4px;display:flex;justify-content:space-between;}
+
+/* IP 详情 */
+.ipd-banner{height:280px;position:relative;display:flex;align-items:flex-end;padding:20px;color:#fff;background:linear-gradient(180deg,#3a2a8a,#0E2A6E);}
+.ipd-banner .ipd-emoji{font-size:90px;position:absolute;top:60px;left:50%;transform:translateX(-50%);}
+.ipd-banner .ipd-acts{position:absolute;top:54px;right:14px;display:flex;gap:8px;}
+.ipd-banner .ipd-acts .a{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.ipd-banner .ipd-back{position:absolute;top:54px;left:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.ipd-banner .ipd-title{font-size:20px;font-weight:800;}
+.ipd-banner .ipd-sub{font-size:12px;opacity:.85;margin-top:3px;}
+.ipd-story{margin:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+.ipd-story h4{font-size:14px;font-weight:800;margin-bottom:8px;}
+.ipd-story p{font-size:12px;color:var(--ink-2);line-height:1.7;}
+.ipd-story .designer{display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+.ipd-story .designer .av{width:38px;height:38px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.ipd-story .designer .dn{font-size:12px;font-weight:700;}
+.ipd-story .designer .dr{font-size:11px;color:var(--ink-3);}
+.ipd-verify{margin:0 12px;background:linear-gradient(90deg,var(--blue),var(--blue-2));border-radius:14px;padding:16px;color:#fff;box-shadow:var(--shadow);}
+.ipd-verify .iv-h{display:flex;align-items:center;gap:10px;}
+.ipd-verify .iv-h .iv-i{font-size:28px;}
+.ipd-verify .iv-h .iv-t{font-size:15px;font-weight:800;}
+.ipd-verify .iv-d{font-size:11px;opacity:.9;margin-top:8px;line-height:1.6;}
+.ipd-verify .iv-chain{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap;}
+.ipd-verify .iv-chain .ic{font-size:10px;background:rgba(255,255,255,.2);padding:3px 8px;border-radius:10px;}
+.ipd-verify .iv-go{margin-top:12px;background:#fff;color:var(--blue);text-align:center;padding:9px;border-radius:22px;font-size:13px;font-weight:700;}
+.collect-section{margin:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+.collect-section .cs-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.collect-section .cs-h h4{font-size:14px;font-weight:800;}
+.collect-section .cs-h .cp{font-size:12px;color:var(--orange);font-weight:700;}
+.cs-prog{height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.cs-prog i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));}
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.style-cell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:30px;background:#f5f5fa;position:relative;}
+.style-cell.owned{background:linear-gradient(135deg,#FFF3E6,#FFE0C2);}
+.style-cell.locked{opacity:.35;filter:grayscale(1);}
+.style-cell .sn{font-size:9px;color:var(--ink-2);margin-top:2px;}
+.style-cell.owned .sn{color:var(--orange);font-weight:700;}
+.style-cell .hid-tag{position:absolute;top:3px;right:3px;font-size:8px;background:var(--gold);color:#3a2400;padding:1px 4px;border-radius:3px;}
+
+/* ===== 直播 ===== */
+.live-top{background:linear-gradient(180deg,var(--blue),#0a1f54);padding:54px 14px 12px;color:#fff;display:flex;align-items:center;justify-content:space-between;}
+.live-top .lt-t{font-size:18px;font-weight:800;}
+.live-cats{display:flex;gap:12px;padding:10px 16px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line);}
+.live-cats::-webkit-scrollbar{display:none;}
+.live-cats .lc{font-size:13px;color:var(--ink-2);white-space:nowrap;padding:5px 12px;border-radius:18px;background:#f5f5fa;}
+.live-cats .lc.on{background:var(--blue);color:#fff;font-weight:700;}
+.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;}
+.live-card{border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--shadow);}
+.live-card .lcov{height:130px;position:relative;display:flex;align-items:center;justify-content:center;font-size:52px;}
+.live-card .lcov .liveing{position:absolute;top:6px;left:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;display:flex;align-items:center;gap:3px;}
+.live-card .lcov .liveing::before{content:"";width:5px;height:5px;border-radius:50%;background:#fff;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-card .lcov .viewers{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;}
+.live-card .lcov .ltype{position:absolute;top:6px;right:6px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.live-card .lc-info{padding:8px;}
+.live-card .lc-title{font-size:12px;font-weight:700;line-height:1.3;}
+.live-card .lc-host{font-size:10px;color:var(--ink-3);margin-top:4px;display:flex;align-items:center;gap:3px;}
+.preview-row{display:flex;gap:10px;padding:0 12px 12px;overflow-x:auto;}
+.preview-row::-webkit-scrollbar{display:none;}
+.pv-card{min-width:200px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--shadow);}
+.pv-card .pvc-top{height:90px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;}
+.pv-card .pvc-top .ptag{position:absolute;top:6px;left:6px;background:var(--orange);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.pv-card .pvc-info{padding:10px;}
+.pv-card .pvc-title{font-size:12px;font-weight:700;}
+.pv-card .pvc-time{font-size:10px;color:var(--ink-3);margin-top:3px;}
+.pv-card .pvc-btn{margin-top:8px;background:var(--blue-soft);color:var(--blue);text-align:center;padding:5px;border-radius:14px;font-size:11px;font-weight:700;}
+.pv-card .pvc-btn.on{background:var(--orange);color:#fff;}
+/* 直播间 */
+.room{position:absolute;inset:0;background:#000;color:#fff;display:none;flex-direction:column;z-index:70;}
+.room.show{display:flex;}
+.room-video{flex:1;position:relative;background:radial-gradient(circle at 50% 40%,#2a2a4a,#000);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.room-video .host-emoji{font-size:120px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.room-video .stand-display{position:absolute;left:8px;bottom:90px;display:flex;flex-direction:column;gap:6px;}
+.room-video .stand-display .sd-item{width:42px;height:42px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.room-top{position:absolute;top:0;left:0;right:0;padding:54px 14px 10px;display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,rgba(0,0,0,.5),transparent);}
+.room-top .rt-host{display:flex;align-items:center;gap:8px;}
+.room-top .rt-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff9a4c);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.room-top .rt-name{font-size:13px;font-weight:700;}
+.room-top .rt-tag{font-size:10px;color:var(--gold);}
+.room-top .rt-viewers{font-size:11px;color:rgba(255,255,255,.8);}
+.room-top .rt-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.room-top .rt-follow{background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:14px;}
+.room-top .rt-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.room-theme{position:absolute;top:108px;left:14px;background:rgba(0,0,0,.4);padding:5px 10px;border-radius:14px;font-size:11px;}
+.room-stock{position:absolute;top:140px;right:14px;background:rgba(255,59,59,.9);padding:4px 10px;border-radius:14px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
+.limited-flash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--red);color:#fff;font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px;animation:flash 1.2s infinite;}
+
+/* 弹幕 */
+.danmaku-area{position:absolute;left:10px;right:60px;bottom:80px;height:120px;overflow:hidden;pointer-events:none;}
+.dm-item{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.4);border-radius:14px;padding:5px 10px;font-size:11px;margin-bottom:6px;animation:dmIn .3s;}
+.dm-item .dm-u{font-weight:700;}
+.dm-item .dm-new{color:#9dd6ff;}
+.dm-item .dm-col{color:var(--gold);}
+.dm-item .dm-vip{color:#ff9a4c;}
+@keyframes dmIn{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:none;}}
+.room-bottom{position:absolute;bottom:0;left:0;right:0;padding:10px 12px calc(10px + 12px);background:rgba(0,0,0,.6);}
+.room-input-row{display:flex;align-items:center;gap:8px;}
+.room-input-row .ri-box{flex:1;background:rgba(255,255,255,.15);border-radius:18px;padding:8px 14px;font-size:12px;color:rgba(255,255,255,.7);}
+.quick-q{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;}
+.quick-q::-webkit-scrollbar{display:none;}
+.quick-q .qq{white-space:nowrap;background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:5px 10px;border-radius:14px;}
+.room-side{position:absolute;right:10px;bottom:130px;display:flex;flex-direction:column;gap:10px;z-index:5;}
+.room-side .rs{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:16px;color:#fff;position:relative;}
+.room-side .rs .rs-t{font-size:8px;transform:scale(.8);}
+.room-side .rs .red-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+.room-product-btn{position:absolute;bottom:75px;left:12px;right:12px;background:linear-gradient(90deg,var(--orange),#ff8a4c);color:#fff;padding:11px;border-radius:24px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;z-index:6;}
+.room-product-btn .rpb-now{background:rgba(255,255,255,.25);font-size:10px;padding:2px 6px;border-radius:8px;}
+/* 直播商品弹窗 */
+.room-sheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;z-index:75;display:none;max-height:75%;overflow:hidden;flex-direction:column;}
+.room-sheet.show{display:flex;animation:sheetUp .3s;}
+.room-sheet .rs-handle{width:40px;height:5px;background:#ddd;border-radius:3px;margin:10px auto 6px;}
+.room-ip-row{display:flex;gap:8px;padding:8px 14px;overflow-x:auto;border-bottom:1px solid var(--line);}
+.room-ip-row::-webkit-scrollbar{display:none;}
+.room-ip-row .rir{white-space:nowrap;font-size:12px;padding:6px 12px;border-radius:16px;background:#f5f5fa;color:var(--ink-2);}
+.room-ip-row .rir.on{background:var(--blue);color:#fff;font-weight:700;}
+.rs-product{padding:12px 14px;display:flex;gap:12px;}
+.rs-product .rsp-img{width:90px;height:90px;border-radius:12px;background:#f7f7fb;display:flex;align-items:center;justify-content:center;font-size:42px;flex-shrink:0;}
+.rs-product .rsp-info{flex:1;}
+.rs-product .rsp-name{font-size:14px;font-weight:700;}
+.rs-product .rsp-meta{font-size:11px;color:var(--ink-3);margin-top:4px;line-height:1.5;}
+.rs-product .rsp-meta b{color:var(--red);}
+.rs-product .rsp-price{font-size:18px;color:var(--orange);font-weight:800;margin-top:6px;}
+.now-playing{margin:0 14px 6px;background:var(--blue-soft);color:var(--blue);font-size:11px;padding:5px 10px;border-radius:10px;font-weight:600;display:inline-block;}
+.rs-guarantee{margin:10px 14px;background:var(--blue-soft);border-radius:12px;padding:10px 12px;}
+.rs-guarantee .rsg-t{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px;}
+.rs-guarantee .rsg-items{display:flex;flex-wrap:wrap;gap:6px;}
+.rs-guarantee .rsg-items span{font-size:10px;color:var(--ink-2);background:#fff;padding:3px 8px;border-radius:8px;}
+.rs-action{padding:10px 14px calc(10px + 16px);display:flex;gap:10px;border-top:1px solid var(--line);}
+.rs-action .rsa{flex:1;text-align:center;padding:11px;border-radius:24px;font-weight:700;font-size:13px;}
+/* ===== 我的 ===== */
+.me-top{background:linear-gradient(180deg,var(--blue),#0a1f54);padding:54px 14px 18px;color:#fff;}
+.me-user{display:flex;align-items:center;gap:12px;}
+.me-user .mu-av{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff9a4c);display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid rgba(255,255,255,.3);}
+.me-user .mu-info{flex:1;}
+.me-user .mu-name{font-size:17px;font-weight:800;display:flex;align-items:center;gap:6px;}
+.me-user .mu-level{font-size:10px;background:var(--gold);color:#3a2400;padding:2px 7px;border-radius:8px;font-weight:700;}
+.me-user .mu-vip{font-size:10px;background:linear-gradient(90deg,#FFD700,#FFA500);color:#3a2400;padding:2px 7px;border-radius:8px;font-weight:700;}
+.me-user .mu-icons{display:flex;gap:12px;font-size:20px;}
+.me-stats{display:flex;margin-top:14px;background:rgba(255,255,255,.1);border-radius:14px;padding:10px;}
+.me-stats .ms{flex:1;text-align:center;}
+.me-stats .ms .n{font-size:18px;font-weight:800;}
+.me-stats .ms .l{font-size:10px;opacity:.8;margin-top:2px;}
+
+/* 资产大盘 */
+.asset-grid{margin:-10px 12px 0;background:#fff;border-radius:16px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;box-shadow:var(--shadow);position:relative;z-index:2;}
+.asset-grid .ag{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
+.asset-grid .ag .agi{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.asset-grid .ag .agn{font-size:11px;font-weight:700;}
+.asset-grid .ag .agd{font-size:9px;color:var(--ink-3);}
+.asset-grid .ag .red-dot{position:absolute;top:0;right:14px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+/* 收藏柜入口 */
+.cabinet-entry{margin:12px;border-radius:18px;background:linear-gradient(120deg,#1a2b5a,#0E2A6E 60%,#3a2a8a);padding:16px;color:#fff;box-shadow:var(--shadow-strong);position:relative;overflow:hidden;}
+.cabinet-entry .ce-deco{position:absolute;right:-10px;top:-10px;font-size:80px;opacity:.15;}
+.cabinet-entry .ce-t{font-size:16px;font-weight:800;}
+.cabinet-entry .ce-s{font-size:11px;opacity:.85;margin-top:4px;}
+.cabinet-entry .ce-stats{display:flex;gap:18px;margin-top:12px;}
+.cabinet-entry .ce-stats .ces .n{font-size:20px;font-weight:800;}
+.cabinet-entry .ce-stats .ces .l{font-size:10px;opacity:.8;}
+.cabinet-entry .ce-go{margin-top:14px;background:var(--orange);display:inline-block;padding:7px 16px;border-radius:18px;font-size:12px;font-weight:700;}
+/* 订单状态 */
+.order-box{margin:0 12px 12px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+.order-box .ob-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.order-box .ob-h h4{font-size:14px;font-weight:800;}
+.order-box .ob-h .more{font-size:11px;color:var(--ink-3);}
+.order-status{display:flex;justify-content:space-around;}
+.order-status .os{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;color:var(--ink-2);position:relative;}
+.order-status .os .osi{font-size:22px;}
+.order-status .os .badge{position:absolute;top:-2px;right:8px;background:var(--red);color:#fff;font-size:8px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+/* 工具图标 */
+.tool-box{margin:0 12px 12px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+.tool-box .tb-title{font-size:13px;font-weight:800;margin-bottom:12px;}
+.tool-row{display:flex;justify-content:space-around;margin-bottom:14px;}
+.tool-row:last-child{margin-bottom:0;}
+.tool-row .tr{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;color:var(--ink-2);}
+.tool-row .tr .tri{width:40px;height:40px;border-radius:12px;background:#f5f5fa;display:flex;align-items:center;justify-content:center;font-size:18px;}
+/* 内容管理 */
+.content-tabs{display:flex;gap:18px;padding:0 16px 10px;border-bottom:1px solid var(--line);background:#fff;margin:0 12px;border-radius:14px 14px 0 0;}
+.content-tabs .ct{font-size:13px;color:var(--ink-2);padding:10px 0;}
+.content-tabs .ct.on{color:var(--blue);font-weight:800;border-bottom:2px solid var(--orange);}
+.content-list{background:#fff;margin:0 12px;border-radius:0 0 14px 14px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.content-list .cl-item{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f7f7fb;}
+/* 收藏柜详情 */
+.cab-ar{height:200px;background:linear-gradient(180deg,#0E2A6E,#1a2b5a);display:flex;align-items:center;justify-content:center;font-size:90px;position:relative;color:#fff;}
+.cab-ar .cab-back{position:absolute;top:54px;left:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.cab-ar .cab-acts{position:absolute;top:54px;right:14px;display:flex;gap:8px;}
+.cab-ar .cab-acts .a{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.cab-ar .cab-title{position:absolute;bottom:14px;left:16px;}
+.cab-ar .cab-title .t1{font-size:18px;font-weight:800;}
+.cab-ar .cab-title .t2{font-size:11px;opacity:.85;}
+.cab-summary{margin:-20px 12px 0;background:#fff;border-radius:18px;padding:16px;box-shadow:var(--shadow);position:relative;z-index:2;}
+.cab-summary .cs-row{display:flex;justify-content:space-around;text-align:center;}
+.cab-summary .cs-row .csr .n{font-size:20px;font-weight:800;color:var(--blue);}
+.cab-summary .cs-row .csr .l{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.cab-section{margin:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+.cab-section h4{font-size:14px;font-weight:800;margin-bottom:10px;}
+.ip-prog-item{margin-bottom:12px;}
+.ip-prog-item .ipi-h{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.ip-prog-item .ipi-h .ipn{font-weight:700;}
+.ip-prog-item .ipi-h .ipr{color:var(--orange);font-weight:700;}
+.ip-prog-item .ipi-bar{height:6px;background:#eee;border-radius:3px;overflow:hidden;}
+.ip-prog-item .ipi-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));}
+.badge-wall{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.badge-wall .bw{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.badge-wall .bw .bwi{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#FFF3E6,#FFE0C2);}
+.badge-wall .bw.locked .bwi{background:#eee;filter:grayscale(1) opacity(.5);}
+.badge-wall .bw .bwl{font-size:9px;color:var(--ink-2);text-align:center;}
+.share-poster{margin:12px;background:linear-gradient(120deg,var(--orange),#ff9a4c);border-radius:16px;padding:16px;color:#fff;text-align:center;box-shadow:var(--shadow);}
+.share-poster .sp-t{font-size:14px;font-weight:800;}
+.share-poster .sp-s{font-size:11px;opacity:.9;margin-top:4px;}
+.share-poster .sp-btn{margin-top:12px;background:#fff;color:var(--orange);display:inline-block;padding:8px 18px;border-radius:18px;font-size:12px;font-weight:700;}
+.spacer-bottom{height:90px;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone">
+    <div class="vol-r"></div>
+    <div class="screen" id="screen">
+      <!-- 状态栏 -->
+      <div class="statusbar" id="statusbar"><span class="time" id="clock">9:41</span><span class="icons">5G 🔋</span></div>
+      <div class="island"></div>
+
+      <!-- 页面容器 -->
+      <div class="pages" id="pages">
+
+      <!-- ========== 首页 ========== -->
+      <section class="page active" id="page-home">
+        <div class="scroll">
+          <div class="home-top">
+            <div class="brand-row">
+              <span class="logo">潮鉴社</span>
+              <span class="camp-tag">校园版</span>
+              <div class="top-icons">
+                <span onclick="toast('学生认证中心')">🎓</span>
+                <span onclick="toast('暂无新消息')">🔔</span>
+              </div>
+            </div>
+            <div class="search-box" onclick="toast('搜索 IP / 系列 / 款式')">
+              <span>🔍</span><span style="opacity:.7">搜 LABUBU、DIMOO、隐藏款…</span>
+            </div>
+          </div>
+
+          <!-- Banner -->
+          <div class="banner" id="banner">
+            <div class="banner-track" id="bannerTrack">
+              <div class="banner-slide" style="background:linear-gradient(120deg,#FF6A2C,#FF9A4C)"><div><div class="b-title">LABUBU 联名首发</div><div class="b-sub">端盒立享隐藏款加抽资格</div></div></div>
+              <div class="banner-slide" style="background:linear-gradient(120deg,#0E2A6E,#3a2a8a)"><div><div class="b-title">校园直播专场</div><div class="b-sub">高校主播开箱 福袋整点抽</div></div></div>
+              <div class="banner-slide" style="background:linear-gradient(120deg,#22C55E,#0E2A6E)"><div><div class="b-title">隐藏款抽签</div><div class="b-sub">绝版大娃 限量 200 件</div></div></div>
+              <div class="banner-slide" style="background:linear-gradient(120deg,#F5B50A,#FF6A2C)"><div><div class="b-title">线下潮玩展联动</div><div class="b-sub">门票+限定款双福利</div></div></div>
+            </div>
+            <div class="banner-dots" id="bannerDots"><span class="on"></span><span></span><span></span><span></span></div>
+          </div>
+
+          <!-- 欧气播报 -->
+          <div class="luck-roll">
+            <span class="icon">🍀</span>
+            <div class="roll-wrap"><div class="roll-inner" id="luckRoll">
+              <div class="roll-item">恭喜 <b>@小鹿快跑</b> 抽到 LABUBU 隐藏款「心动」！</div>
+              <div class="roll-item"><b>@藏家阿K</b> 集齐 DIMOO 全套 解锁典藏成就</div>
+              <div class="roll-item"><b>@校园柚子</b> 端盒开出 SKULLPANDA 稀有色</div>
+              <div class="roll-item"><b>@大魔王</b> 即时抽赏命中终极大赏</div>
+              <div class="roll-item">恭喜 <b>@月月鸟</b> 抽到 LABUBU 隐藏款「心动」！</div>
+            </div></div>
+            <span style="font-size:11px;color:var(--ink-3)">实时</span>
+          </div>
+
+          <!-- 四宫格 -->
+          <div class="grid4">
+            <div class="item" onclick="toast('签到任务 · 已签到 3 天')"><div class="gi">📅</div>签到任务</div>
+            <div class="item" onclick="toast('AI 虚拟试拆 · 今日剩余 3 次')"><div class="gi">🤖</div>AI试拆</div>
+            <div class="item" onclick="nav('page-play-instant')"><div class="gi">🎰</div>欧气磁场</div>
+            <div class="item" onclick="toast('藏家社群 · 按IP分流')"><div class="gi">💬</div>藏家社群</div>
+          </div>
+
+          <!-- 新人福利 -->
+          <div class="newbie" onclick="toast('新人首单立减 ¥30')">
+            <div class="nb-l"><div class="t1">新人首单立减 ¥30</div><div class="t2">仅限新用户 · 限时领券</div></div>
+            <div class="countdown" id="newbieCd">02:48:59</div>
+          </div>
+          <div class="newbie-cards">
+            <div class="nc-card" onclick="nav('page-product')"><div class="nc-img">🐰</div><div class="nc-info"><div class="nc-name">LABUBU 入门款</div><div class="nc-price">¥39</div></div></div>
+            <div class="nc-card" onclick="nav('page-product')"><div class="nc-img">🐻</div><div class="nc-info"><div class="nc-name">DIMOO 萌宠</div><div class="nc-price">¥45</div></div></div>
+            <div class="nc-card" onclick="nav('page-product')"><div class="nc-img">👾</div><div class="nc-info"><div class="nc-name">SKULLPANDA</div><div class="nc-price">¥49</div></div></div>
+            <div class="nc-card" onclick="nav('page-product')"><div class="nc-img">🐱</div><div class="nc-info"><div class="nc-name">CRYBABY 盲盒</div><div class="nc-price">¥39</div></div></div>
+          </div>
+
+
+          <!-- 爆款主推 -->
+          <div class="sec-title"><h3>🔥 爆款主推</h3><span class="more" onclick="toast('查看更多爆款')">更多 ›</span></div>
+          <div class="hero-card" onclick="nav('page-product')">
+            <div class="hero-img" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)"><span>🧸</span><span class="flash">限量 500 件 售完绝版</span></div>
+            <div class="hero-info">
+              <div class="h-name">LABUBU 心动系列 · 端盒大娃</div>
+              <div class="h-sub">含 1 款隐藏 · 全套 12 款 · 在线抽盒 / 现货直发</div>
+              <div class="h-bottom">
+                <div class="h-price">¥899<small>¥1299</small></div>
+                <button class="btn btn-primary" onclick="event.stopPropagation();nav('page-play-queue')">立即端盒</button>
+              </div>
+            </div>
+          </div>
+          <div class="hero-thumbs">
+            <div class="ht" onclick="nav('page-product')">🐰</div>
+            <div class="ht" onclick="nav('page-product')">🐻</div>
+            <div class="ht" onclick="nav('page-product')">👾</div>
+            <div class="ht" onclick="nav('page-product')">🐱</div>
+            <div class="ht" onclick="nav('page-product')">🦊</div>
+            <div class="ht" onclick="nav('page-product')">🐧</div>
+          </div>
+
+          <!-- 分类货架 -->
+          <div class="cat-tabs" id="catTabs">
+            <span class="ct on" onclick="switchCat(0)">人气IP</span>
+            <span class="ct" onclick="switchCat(1)">抽盒玩法</span>
+            <span class="ct" onclick="switchCat(2)">品类专区</span>
+            <span class="ct" onclick="switchCat(3)">校园专属</span>
+          </div>
+          <div class="cat-panel" id="catPanel">
+            <!-- 人气IP -->
+            <div class="cat-pane" style="display:block">
+              <div class="ip-block" style="background:linear-gradient(120deg,#FF6A2C,#FF9A4C)" onclick="nav('page-ipdetail')">
+                <div class="ip-h"><span class="ipn">LABUBU · 心动系列</span><span class="verified-badge">正品溯源</span></div>
+                <div class="ip-big">🐰</div>
+                <div class="ip-row"><div class="ips">🧸</div><div class="ips">🎀</div><div class="ips">💫</div></div>
+              </div>
+              <div class="ip-block" style="background:linear-gradient(120deg,#0E2A6E,#3a2a8a)" onclick="nav('page-ipdetail')">
+                <div class="ip-h"><span class="ipn">DIMOO · 星际探索</span><span class="verified-badge">正品溯源</span></div>
+                <div class="ip-big">🐻</div>
+                <div class="ip-row"><div class="ips">⭐</div><div class="ips">🚀</div><div class="ips">🌌</div></div>
+              </div>
+              <div class="ip-block" style="background:linear-gradient(120deg,#22C55E,#0E2A6E)" onclick="nav('page-ipdetail')">
+                <div class="ip-h"><span class="ipn">SKULLPANDA · 密语</span><span class="verified-badge">正品溯源</span></div>
+                <div class="ip-big">👾</div>
+                <div class="ip-row"><div class="ips">🖤</div><div class="ips">💀</div><div class="ips">🌹</div></div>
+              </div>
+            </div>
+            <!-- 抽盒玩法 -->
+            <div class="cat-pane" style="display:none">
+              <div class="play-grid">
+                <div class="play-card" style="background:linear-gradient(135deg,#0E2A6E,#3a2a8a)" onclick="nav('page-play-queue')"><div><div class="pn">排队盲盒</div><div class="pd">实体盒柜 · 限时锁盒</div></div><div class="pe">🧊</div></div>
+                <div class="play-card" style="background:linear-gradient(135deg,#FF6A2C,#FF9A4C)" onclick="nav('page-play-grade')"><div><div class="pn">梯度福赏</div><div class="pd">终极大赏 · 全梯度</div></div><div class="pe">🏆</div></div>
+                <div class="play-card" style="background:linear-gradient(135deg,#22C55E,#0E2A6E)" onclick="nav('page-play-instant')"><div><div class="pn">即时抽赏</div><div class="pd">无排队 · 即时开奖</div></div><div class="pe">⚡</div></div>
+                <div class="play-card" style="background:linear-gradient(135deg,#F5B50A,#FF6A2C)" onclick="nav('page-play-ming')"><div><div class="pn">明款现货</div><div class="pd">固定款 · 无随机</div></div><div class="pe">📦</div></div>
+              </div>
+            </div>
+            <!-- 品类 -->
+            <div class="cat-pane" style="display:none">
+              <div class="play-grid">
+                <div class="play-card" style="background:linear-gradient(135deg,#FFB6C1,#FF6A2C)" onclick="nav('page-product')"><div><div class="pn">软萌毛绒</div><div class="pd">抱抱系列</div></div><div class="pe">🧸</div></div>
+                <div class="play-card" style="background:linear-gradient(135deg,#0E2A6E,#1A3CA8)" onclick="nav('page-product')"><div><div class="pn">潮玩周边</div><div class="pd">徽章/挂件</div></div><div class="pe">🎟️</div></div>
+                <div class="play-card" style="background:linear-gradient(135deg,#3a2a8a,#0E2A6E)" onclick="nav('page-product')"><div><div class="pn">艺术典藏大娃</div><div class="pd">限量绝版</div></div><div class="pe">👑</div></div>
+                <div class="play-card" style="background:linear-gradient(135deg,#F5B50A,#22C55E)" onclick="nav('page-product')"><div><div class="pn">IP联名专区</div><div class="pd">跨界合作</div></div><div class="pe">🤝</div></div>
+              </div>
+            </div>
+            <!-- 校园 -->
+            <div class="cat-pane" style="display:none">
+              <div class="ip-block" style="background:linear-gradient(120deg,#FF6A2C,#F5B50A)" onclick="nav('page-live')">
+                <div class="ip-h"><span class="ipn">🎓 学生认证专属折扣</span><span class="student-badge">校园</span></div>
+                <div class="ip-big" style="font-size:42px;line-height:1.4;text-align:center">认证学生<br>享隐藏款专属价</div>
+              </div>
+              <div class="ip-block" style="background:linear-gradient(120deg,#0E2A6E,#22C55E)" onclick="nav('page-live')">
+                <div class="ip-h"><span class="ipn">📺 校园主播带货专场</span><span class="student-badge">直播</span></div>
+                <div class="ip-big">🎙️</div>
+              </div>
+              <div class="ip-block" style="background:linear-gradient(120deg,#3a2a8a,#FF6A2C)" onclick="toast('高校同城换娃')">
+                <div class="ip-h"><span class="ipn">🤝 高校同城换娃</span><span class="student-badge">同城</span></div>
+                <div class="ip-big" style="font-size:42px;line-height:1.4;text-align:center">附近藏家<br>重复款互换</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 晒单墙 -->
+          <div class="sec-title"><h3>📸 玩家晒单墙</h3><span class="more" onclick="toast('查看全部晒单')">更多 ›</span></div>
+          <div class="ranks">
+            <div class="rk" style="background:linear-gradient(120deg,#FF6A2C,#FF9A4C)" onclick="toast('欧气榜')"><div class="rt">🍀 欧气榜</div><div class="ri">本月隐藏款 TOP100</div></div>
+            <div class="rk" style="background:linear-gradient(120deg,#0E2A6E,#3a2a8a)" onclick="toast('全套收藏家榜')"><div class="rt">👑 全套收藏家</div><div class="ri">集齐系列最多</div></div>
+            <div class="rk" style="background:linear-gradient(120deg,#22C55E,#0E2A6E)" onclick="toast('高端藏品榜')"><div class="rt">💎 高端藏品榜</div><div class="ri">绝版大娃藏家</div></div>
+          </div>
+          <div class="show-wall">
+            <div class="show-card" onclick="nav('page-product')">
+              <div class="sc-img" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)"><span class="lv">LV.8</span>🧸</div>
+              <div class="sc-info"><div class="sc-name">LABUBU 心动隐藏款开箱实拍</div><div class="sc-user">😀 @小鹿快跑</div></div>
+            </div>
+            <div class="show-card" onclick="nav('page-product')">
+              <div class="sc-img" style="background:linear-gradient(135deg,#E8F4FF,#BFD4FF)"><span class="lv">LV.10</span>🐻</div>
+              <div class="sc-info"><div class="sc-name">DIMOO 星际全套集齐打卡</div><div class="sc-user">😎 @藏家阿K</div></div>
+            </div>
+            <div class="show-card" onclick="nav('page-product')">
+              <div class="sc-img" style="background:linear-gradient(135deg,#F0EAFF,#D4C8FF)"><span class="lv">LV.6</span>👾</div>
+              <div class="sc-info"><div class="sc-name">SKULLPANDA 稀有色对比</div><div class="sc-user">🤩 @校园柚子</div></div>
+            </div>
+            <div class="show-card" onclick="nav('page-product')">
+              <div class="sc-img" style="background:linear-gradient(135deg,#E8FFF3,#B8FFD9)"><span class="lv">LV.12</span>💎</div>
+              <div class="sc-info"><div class="sc-name">绝版大娃开箱 全网仅 50</div><div class="sc-user">👑 @大魔王</div></div>
+            </div>
+          </div>
+
+          <div class="spacer-bottom"></div>
+        </div>
+      </section>
+      <!-- ========== /首页 ========== -->
+
+      <!-- ========== 排队盲盒 ========== -->
+      <section class="page" id="page-play-queue">
+        <div class="scroll">
+          <div class="play-head">
+            <div class="ph-top">
+              <span class="ph-back" onclick="nav('page-home')">‹</span>
+              <span class="ph-title">LABUBU 心动系列 · 排队盲盒</span>
+              <div class="ph-acts"><span onclick="toggleFav(this)">🤍</span><span onclick="toast('已分享')">↗</span><span onclick="toast('玩法说明')">ⓘ</span></div>
+            </div>
+            <div class="play-mode-tag">🧊 排队盲盒 · 限时锁盒</div>
+          </div>
+          <div class="countdown-bar">
+            <div class="cl">锁盒倒计时 · 超时自动释放库存<br><b>请尽快完成支付</b></div>
+            <div class="cd-time" id="queueCd">14:59</div>
+          </div>
+          <div class="box-cabinet">
+            <div class="bc-title"><span>实体盒柜 · 12 格陈列</span><span style="font-size:11px;color:var(--ink-3)">已售 5 / 12</span></div>
+            <div class="box-grid" id="boxGrid">
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell sold">🎁</div>
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell sold">🎁</div>
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell sold">🎁</div>
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell sold">🎁</div>
+              <div class="box-cell" onclick="pickBox(this)">🎁<span class="qmark">?</span></div>
+              <div class="box-cell sold">🎁</div>
+            </div>
+          </div>
+          <div class="ship-tip">📦 预售发货：2026/07/20 准确发货，附独立溯源码</div>
+          <div style="margin:0 12px 12px"><div class="verified-bar" style="margin:0" onclick="openVerify()"><span class="vb-i">🛡️</span><div class="vb-t"><div class="vt1">潮鉴正品 · 一物一码</div><div class="vt2">生产-入库-物流全链路溯源</div></div><span class="vb-go">›</span></div></div>
+          <div class="spacer-bottom"></div>
+        </div>
+        <div class="action-bar">
+          <button class="ab-btn btn-blue" onclick="nav('page-product')">查看商品详情</button>
+          <button class="ab-btn btn-primary" onclick="openDraw('随机选 1 盒 · ¥79')">随机选1盒 ¥79</button>
+        </div>
+      </section>
+
+      <!-- ========== 梯度福赏 ========== -->
+      <section class="page" id="page-play-grade">
+        <div class="scroll">
+          <div class="play-head">
+            <div class="ph-top">
+              <span class="ph-back" onclick="nav('page-home')">‹</span>
+              <span class="ph-title">DIMOO 星际 · 梯度福赏</span>
+              <div class="ph-acts"><span onclick="toggleFav(this)">🤍</span><span onclick="toast('已分享')">↗</span><span onclick="toast('玩法说明')">ⓘ</span></div>
+            </div>
+            <div class="play-mode-tag" style="background:var(--blue)">🏆 第 28 / 100 场 · 切换场次 ‹ ›</div>
+          </div>
+          <div class="countdown-bar">
+            <div class="cl">本场剩余库存<br><b>仅剩 23 份</b></div>
+            <div class="cd-time" style="color:var(--blue)">23 份</div>
+          </div>
+          <div class="cat-tabs" style="margin:0 12px;border-radius:12px"><span class="ct on">商品概览</span><span class="ct">惊喜记录</span><span class="ct">全部场次</span></div>
+          <div class="record-roll" id="gradeRecord">
+            <div class="rrl"><b>@幸运星</b> 抽中 一等福赏 · 星际隐藏款</div>
+            <div class="rrl"><b>@月光</b> 抽中 二等福赏 · 限定徽章套</div>
+          </div>
+          <div class="grade-section">
+            <div class="grade-h"><span>🎁 全梯度奖品图鉴</span><span style="font-size:11px;color:var(--ink-3)">5 个等级</span></div>
+            <div class="grade-list">
+              <div class="gl-item gtop"><div class="gimg">👑</div><div class="ginfo"><div class="gn">终极大赏 · 绝版大娃 1:1</div><div class="gd">限量绝版 · 含独立编号证书</div></div><div class="gqty">剩 1</div></div>
+              <div class="gl-item"><div class="gimg">💎</div><div class="ginfo"><div class="gn">一等福赏 · 星际隐藏款</div><div class="gd">参考原价 ¥499</div></div><div class="gqty">剩 3</div></div>
+              <div class="gl-item"><div class="gimg">🌟</div><div class="ginfo"><div class="gn">二等福赏 · 限定徽章套</div><div class="gd">参考原价 ¥199</div></div><div class="gqty">剩 6</div></div>
+              <div class="gl-item"><div class="gimg">🚀</div><div class="ginfo"><div class="gn">三等福赏 · 挂件周边</div><div class="gd">参考原价 ¥99</div></div><div class="gqty">剩 9</div></div>
+              <div class="gl-item"><div class="gimg">⭐</div><div class="ginfo"><div class="gn">四等福赏 · 普通款盲盒</div><div class="gd">参考原价 ¥49</div></div><div class="gqty">剩 4</div></div>
+            </div>
+          </div>
+          <div class="spacer-bottom"></div>
+        </div>
+        <div class="action-bar">
+          <button class="ab-btn btn-ghost" onclick="openDraw('买 1 个 · ¥59')">买1个 ¥59</button>
+          <button class="ab-btn btn-blue" onclick="openDraw('买 3 个 · ¥159')">买3个 ¥159</button>
+          <button class="ab-btn btn-primary" onclick="openDraw('包套清空全场 · ¥899')">包套 ¥899</button>
+        </div>
+      </section>
+
+      <!-- ========== 即时抽赏 ========== -->
+      <section class="page" id="page-play-instant">
+        <div class="scroll">
+          <div class="play-head">
+            <div class="ph-top">
+              <span class="ph-back" onclick="nav('page-home')">‹</span>
+              <span class="ph-title">SKULLPANDA · 即时抽赏</span>
+              <div class="ph-acts"><span onclick="toggleFav(this)">🤍</span><span onclick="toast('已分享')">↗</span><span onclick="toast('玩法说明')">ⓘ</span></div>
+            </div>
+            <div class="play-mode-tag" style="background:var(--green)">⚡ 萌速模式 · 无排队即时开奖</div>
+          </div>
+          <div class="pool-bar">
+            <div class="pb-top"><span>当前奖池 · 第 3 箱</span><span>剩余 <b>31</b>/50 份 · <span onclick="toast('已切换新奖池')" style="color:var(--orange);font-weight:700">换箱 ›</span></span></div>
+            <div class="pool-prog"><i style="width:62%"></i></div>
+          </div>
+          <div style="padding:0 12px 4px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;color:var(--ink-2)">跳过动画</span><span onclick="this.classList.toggle('on')" class="skip-sw" style="width:38px;height:22px;background:#ccc;border-radius:11px;position:relative;transition:.2s"><span style="position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s"></span></span></div>
+          <div class="prize-grid">
+            <div class="prize-card"><div class="pc-img" style="background:#F0EAFF"><span class="lv-tag" style="background:var(--gold)">SSR</span>👑</div><div class="pc-info"><div class="pc-name">终极大赏</div><div class="pc-meta"><span>剩 1</span><span>概率 0.5%</span></div></div></div>
+            <div class="prize-card"><div class="pc-img" style="background:#E8F4FF"><span class="lv-tag" style="background:var(--red)">SR</span>💎</div><div class="pc-info"><div class="pc-name">稀有隐藏款</div><div class="pc-meta"><span>剩 2</span><span>概率 3%</span></div></div></div>
+            <div class="prize-card"><div class="pc-img" style="background:#FFF0E6"><span class="lv-tag" style="background:var(--orange)">R</span>🌟</div><div class="pc-info"><div class="pc-name">限定徽章</div><div class="pc-meta"><span>剩 5</span><span>概率 10%</span></div></div></div>
+            <div class="prize-card gone"><div class="pc-img" style="background:#f5f5fa"><span class="lv-tag" style="background:#999">N</span>📦</div><div class="pc-info"><div class="pc-name">普通款 A</div><div class="pc-meta"><span>售罄</span><span>原价 ¥49</span></div></div></div>
+            <div class="prize-card"><div class="pc-img" style="background:#E8FFF3"><span class="lv-tag" style="background:var(--green)">N</span>🚀</div><div class="pc-info"><div class="pc-name">普通款 B</div><div class="pc-meta"><span>剩 8</span><span>概率 40%</span></div></div></div>
+            <div class="prize-card"><div class="pc-img" style="background:#FFF0E6"><span class="lv-tag" style="background:var(--orange)">R</span>🎀</div><div class="pc-info"><div class="pc-name">挂件周边</div><div class="pc-meta"><span>剩 15</span><span>概率 46.5%</span></div></div></div>
+          </div>
+          <div class="spacer-bottom" style="height:110px"></div>
+        </div>
+        <div class="float-side">
+          <div class="fs" onclick="toast('免费试玩')">🎮</div>
+          <div class="fs" onclick="toast('玩法说明')">ⓘ</div>
+          <div class="fs" onclick="nav('page-me')">🎒</div>
+          <div class="fs" onclick="toast('加群领福利')">💬</div>
+        </div>
+        <div class="action-bar">
+          <button class="ab-btn btn-ghost" onclick="openDraw('买 1 个 · ¥39')">1个¥39</button>
+          <button class="ab-btn btn-blue" onclick="openDraw('买 3 个 · ¥109')">3个¥109</button>
+          <button class="ab-btn btn-primary" onclick="openDraw('全收 · ¥499')">全收¥499</button>
+        </div>
+      </section>
+
+      <!-- ========== 明款现货 ========== -->
+      <section class="page" id="page-play-ming">
+        <div class="scroll">
+          <div class="play-head">
+            <div class="ph-top">
+              <span class="ph-back" onclick="nav('page-home')">‹</span>
+              <span class="ph-title">明款现货专区</span>
+              <div class="ph-acts"><span onclick="toast('已分享')">↗</span><span onclick="toast('玩法说明')">ⓘ</span></div>
+            </div>
+            <div class="play-mode-tag" style="background:var(--gold);color:#3a2400">📦 明款公示 · 无随机风险 · 现货直发</div>
+          </div>
+          <div class="ming-grid">
+            <div class="ming-card" onclick="nav('page-product')"><div class="mc-img" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)">🧸</div><div class="mc-info"><div class="mc-name">LABUBU 心动·普通款</div><div class="mc-price">¥79</div></div></div>
+            <div class="ming-card" onclick="nav('page-product')"><div class="mc-img" style="background:linear-gradient(135deg,#E8F4FF,#BFD4FF)">🐻</div><div class="mc-info"><div class="mc-name">DIMOO 星际·探索款</div><div class="mc-price">¥89</div></div></div>
+            <div class="ming-card" onclick="nav('page-product')"><div class="mc-img" style="background:linear-gradient(135deg,#F0EAFF,#D4C8FF)">👾</div><div class="mc-info"><div class="mc-name">SKULLPANDA 密语</div><div class="mc-price">¥99</div></div></div>
+            <div class="ming-card" onclick="nav('page-product')"><div class="mc-img" style="background:linear-gradient(135deg,#E8FFF3,#B8FFD9)">🐱</div><div class="mc-info"><div class="mc-name">CRYBABY 系列</div><div class="mc-price">¥69</div></div></div>
+            <div class="ming-card" onclick="nav('page-product')"><div class="mc-img" style="background:linear-gradient(135deg,#FFF0E6,#FFD6BA)">🦊</div><div class="mc-info"><div class="mc-name">森林童话·限定</div><div class="mc-price">¥129</div></div></div>
+            <div class="ming-card" onclick="nav('page-product')"><div class="mc-img" style="background:linear-gradient(135deg,#FFF3E6,#FFB6C1)">🐧</div><div class="mc-info"><div class="mc-name">极地小队·联名</div><div class="mc-price">¥119</div></div></div>
+          </div>
+          <div class="spacer-bottom" style="height:110px"></div>
+        </div>
+        <div class="float-side">
+          <div class="fs" onclick="toast('免费试玩')">🎮</div>
+          <div class="fs" onclick="toast('玩法说明')">ⓘ</div>
+          <div class="fs" onclick="nav('page-me')">🎒</div>
+          <div class="fs" onclick="toast('加群领福利')">💬</div>
+        </div>
+      </section>
+
+      <!-- ========== 商品详情 ========== -->
+      <section class="page" id="page-product">
+        <div class="scroll">
+          <div class="pd-banner">
+            <span class="pd-back" onclick="goBack()">‹</span>
+            <div class="pd-acts"><span class="a" onclick="toggleFav(this)">🤍</span><span class="a" onclick="toast('已分享')">↗</span></div>
+            🧸
+          </div>
+          <div class="pd-info">
+            <div class="pd-price-row"><span class="pp">¥79</span><span class="pp-old">¥129</span></div>
+            <div class="pd-name">LABUBU 心动系列 · 单盒盲盒</div>
+            <div class="pd-sub">尺寸 8cm · PVC材质 · 含隐藏款概率 · 限量绝版</div>
+            <div class="pd-tags">
+              <span class="chip tag-orange">在线抽盒</span>
+              <span class="chip tag-red">限量绝版</span>
+              <span class="chip tag-soft">含隐藏款</span>
+              <span class="chip tag-gold">端盒优惠</span>
+              <span class="student-badge">🎓 学生价 ¥69</span>
+            </div>
+          </div>
+          <div class="verified-bar" onclick="openVerify()">
+            <span class="vb-i">🛡️</span>
+            <div class="vb-t"><div class="vt1">潮鉴正品 · 一物一码</div><div class="vt2">收货后扫码可查：生产工厂 → 质检报告 → 品牌授权 → 入库核验 → 物流流转</div></div>
+            <span class="vb-go">›</span>
+          </div>
+          <div class="pd-section">
+            <h4>规格选择</h4>
+            <div class="spec-row">
+              <span class="sp on" onclick="pickSpec(this)">单盒盲盒</span>
+              <span class="sp" onclick="pickSpec(this)">端盒（全套12款）</span>
+              <span class="sp" onclick="pickSpec(this)">大娃手办</span>
+              <span class="sp" onclick="pickSpec(this)">挂件周边</span>
+            </div>
+          </div>
+          <div class="pd-section">
+            <h4>IP 故事</h4>
+            <div class="pd-story">
+              LABUBU 是泡泡玛特旗下经典 IP，由设计师龙家升创作。心动系列以「心跳瞬间」为主题，12 款普通款 + 1 款隐藏款，每一只都承载着不同的心动故事。本次联名版本特别加入潮鉴社专属色款，仅限平台发售。
+              <div style="margin-top:10px;display:flex;align-items:center;gap:10px"><span style="width:38px;height:38px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:18px">👨‍🎨</span><div><span style="font-size:12px;font-weight:700">龙家升</span><br><span style="font-size:11px;color:var(--ink-3)">LABUBU 创始设计师 · 潮鉴社联名创作</span></div></div>
+            </div>
+          </div>
+          <div class="pd-section">
+            <h4>售后保障</h4>
+            <div style="font-size:12px;color:var(--ink-2);line-height:1.7">
+              ✅ 七天无理由退换<br>
+              ✅ 瑕疵补发（拍照举证 48h 内处理）<br>
+              ✅ 隐藏款缺件赔付机制<br>
+              ✅ 正品溯源码终身绑定
+            </div>
+          </div>
+          <div class="spacer-bottom" style="height:90px"></div>
+        </div>
+        <div class="pd-action">
+          <div class="pa-ico" onclick="toast('已加入购物车')">🛒<span>购物车</span></div>
+          <div class="pa-cart" onclick="toast('已加入购物车')">加入购物车</div>
+          <div class="pa-buy" onclick="openDraw('立即购买 · ¥79')">立即购买</div>
+        </div>
+      </section>
+
+      <!-- ========== IP图鉴列表 ========== -->
+      <section class="page" id="page-guide">
+        <div class="scroll">
+          <div class="guide-top">
+            <div class="gt-title">IP 图鉴</div>
+            <div class="gt-sub">正品溯源 · 收藏进度 · IP文化</div>
+            <div class="guide-search" onclick="toast('搜索IP名称/系列名')">
+              <span>🔍</span><span style="opacity:.7">搜 IP 名称、系列名…</span>
+            </div>
+          </div>
+          <div class="guide-cats" id="guideCats">
+            <span class="gc on" onclick="switchGuideCat(0)">全部</span>
+            <span class="gc" onclick="switchGuideCat(1)">盲盒系列</span>
+            <span class="gc" onclick="switchGuideCat(2)">大娃手办</span>
+            <span class="gc" onclick="switchGuideCat(3)">毛绒周边</span>
+            <span class="gc" onclick="switchGuideCat(4)">联名限定</span>
+            <span class="gc" onclick="switchGuideCat(5)">绝版典藏</span>
+          </div>
+          <div class="guide-grid">
+            <div class="ip-card" onclick="nav('page-ipdetail')">
+              <div class="ic-cover" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)"><span class="vbadge"><span class="verified-badge">正品</span></span>🐰</div>
+              <div class="ic-info"><div class="ic-name">LABUBU · 心动系列</div><div class="ic-meta">12款 + 1隐藏 · PVC</div><div class="ip-prog"><i style="width:75%"></i></div><div class="ic-prog-t"><span>收藏进度</span><span>9/12</span></div></div>
+            </div>
+            <div class="ip-card" onclick="nav('page-ipdetail')">
+              <div class="ic-cover" style="background:linear-gradient(135deg,#E8F4FF,#BFD4FF)"><span class="vbadge"><span class="verified-badge">正品</span></span>🐻</div>
+              <div class="ic-info"><div class="ic-name">DIMOO · 星际探索</div><div class="ic-meta">10款 + 1隐藏 · PVC</div><div class="ip-prog"><i style="width:50%"></i></div><div class="ic-prog-t"><span>收藏进度</span><span>5/10</span></div></div>
+            </div>
+            <div class="ip-card" onclick="nav('page-ipdetail')">
+              <div class="ic-cover" style="background:linear-gradient(135deg,#F0EAFF,#D4C8FF)"><span class="vbadge"><span class="verified-badge">正品</span></span>👾</div>
+              <div class="ic-info"><div class="ic-name">SKULLPANDA · 密语系列</div><div class="ic-meta">8款 + 1隐藏 · PVC</div><div class="ip-prog"><i style="width:33%"></i></div><div class="ic-prog-t"><span>收藏进度</span><span>3/8</span></div></div>
+            </div>
+            <div class="ip-card" onclick="nav('page-ipdetail')">
+              <div class="ic-cover" style="background:linear-gradient(135deg,#E8FFF3,#B8FFD9)"><span class="vbadge"><span class="verified-badge">正品</span></span>🐱</div>
+              <div class="ic-info"><div class="ic-name">CRYBABY · 情绪盲盒</div><div class="ic-meta">6款 + 1隐藏 · 搪胶</div><div class="ip-prog"><i style="width:100%"></i></div><div class="ic-prog-t"><span>✅ 已集齐</span><span>7/7</span></div></div>
+            </div>
+            <div class="ip-card" onclick="nav('page-ipdetail')">
+              <div class="ic-cover" style="background:linear-gradient(135deg,#FFF0E6,#FFB6C1)"><span class="vbadge"><span class="verified-badge">正品</span></span>🦊</div>
+              <div class="ic-info"><div class="ic-name">森林童话 · 联名限定</div><div class="ic-meta">4款限定 · 毛绒</div><div class="ip-prog"><i style="width:25%"></i></div><div class="ic-prog-t"><span>收藏进度</span><span>1/4</span></div></div>
+            </div>
+            <div class="ip-card" onclick="nav('page-ipdetail')">
+              <div class="ic-cover" style="background:linear-gradient(135deg,#FFF3E6,#F5B50A)"><span class="vbadge"><span class="verified-badge">正品</span></span>👑</div>
+              <div class="ic-info"><div class="ic-name">艺术典藏大娃 · 绝版</div><div class="ic-meta">1款 · 限量200件</div><div class="ip-prog"><i style="width:0%"></i></div><div class="ic-prog-t"><span>收藏进度</span><span>0/1</span></div></div>
+            </div>
+          </div>
+          <div class="spacer-bottom"></div>
+        </div>
+      </section>
+
+      <!-- ========== IP系列详情 ========== -->
+      <section class="page" id="page-ipdetail">
+        <div class="scroll">
+          <div class="ipd-banner">
+            <span class="ipd-back" onclick="goBack()">‹</span>
+            <div class="ipd-acts"><span class="a" onclick="toggleFav(this)">🤍</span><span class="a" onclick="toast('已分享')">↗</span></div>
+            <span class="ipd-emoji">🐰</span>
+            <div style="z-index:1"><div class="ipd-title">LABUBU · 心动系列</div><div class="ipd-sub">12款普通 + 1款隐藏 · 龙家升设计 · 联名限定</div></div>
+          </div>
+
+          <!-- IP故事 -->
+          <div class="ipd-story">
+            <h4>📖 IP 故事</h4>
+            <p>LABUBU 是泡泡玛特旗下经典 IP，由设计师龙家升创作。心动系列以「心跳瞬间」为主题，每一只都承载着不同的心动故事。潮鉴社联名版本特别加入专属色款，仅限平台发售。</p>
+            <div class="designer">
+              <div class="av">👨‍🎨</div>
+              <div><div class="dn">龙家升</div><div class="dr">LABUBU 创始设计师 · 20年创作历程 · 潮鉴社联名创作顾问</div></div>
+            </div>
+          </div>
+
+          <!-- 正品溯源核心板块 -->
+          <div class="ipd-verify" onclick="openVerify()">
+            <div class="iv-h"><span class="iv-i">🛡️</span><span class="iv-t">潮鉴正品 · 一物一码</span></div>
+            <div class="iv-d">本系列所有商品均附带唯一溯源码，收货后扫码可查完整链路。每一件 LABUBU 心动系列均可追溯到：</div>
+            <div class="iv-chain">
+              <span class="ic">🏭 生产工厂</span>
+              <span class="ic">📋 质检报告</span>
+              <span class="ic">📜 品牌授权</span>
+              <span class="ic">✅ 入库核验</span>
+              <span class="ic">🚚 物流流转</span>
+            </div>
+            <div class="iv-go">查看溯源详情 ›</div>
+          </div>
+
+          <!-- 全系列款式图鉴 -->
+          <div class="collect-section">
+            <div class="cs-h"><h4>🎨 全系列款式图鉴</h4><span class="cp">已收集 9/13</span></div>
+            <div class="cs-prog"><i style="width:69%"></i></div>
+            <div class="style-grid">
+              <div class="style-cell owned">🧸<span class="sn">心动</span></div>
+              <div class="style-cell owned">🎀<span class="sn">甜梦</span></div>
+              <div class="style-cell owned">💫<span class="sn">星愿</span></div>
+              <div class="style-cell owned">🌸<span class="sn">花语</span></div>
+              <div class="style-cell owned">🌈<span class="sn">彩虹</span></div>
+              <div class="style-cell owned">☀️<span class="sn">阳光</span></div>
+              <div class="style-cell owned">🌙<span class="sn">月光</span></div>
+              <div class="style-cell owned">❄️<span class="sn">冰心</span></div>
+              <div class="style-cell owned">🔥<span class="sn">烈焰</span></div>
+              <div class="style-cell locked">🦋<span class="sn">蝶舞</span></div>
+              <div class="style-cell locked">🌊<span class="sn">深海</span></div>
+              <div class="style-cell locked">🪐<span class="sn">星球</span></div>
+              <div class="style-cell locked"><span class="hid-tag">隐藏</span>👑<span class="sn">心动·隐藏</span></div>
+            </div>
+          </div>
+
+          <!-- 收藏进度 -->
+          <div class="collect-section" style="background:linear-gradient(120deg,var(--blue-soft),#EAF0FF)">
+            <div class="cs-h"><h4>🏆 集齐激励</h4><span class="cp">差 4 款集齐</span></div>
+            <div style="font-size:12px;color:var(--ink-2);line-height:1.7">
+              ✨ 集齐全套解锁「心动典藏大师」专属成就徽章<br>
+              ✨ 集齐后获得隐藏款抽签加成 +30%<br>
+              ✨ 全套集齐可生成专属收藏海报
+            </div>
+          </div>
+
+          <!-- 玩家晒单 -->
+          <div class="sec-title"><h3>📸 玩家晒单</h3><span class="more" onclick="toast('查看更多晒单')">更多 ›</span></div>
+          <div style="display:flex;gap:10px;padding:0 12px 12px;overflow-x:auto">
+            <div style="min-width:160px;height:120px;border-radius:12px;background:linear-gradient(135deg,#FFE7D6,#FFCFA8);display:flex;align-items:center;justify-content:center;font-size:42px">🧸<br><span style="font-size:10px;color:var(--ink-2)">@小鹿</span></div>
+            <div style="min-width:160px;height:120px;border-radius:12px;background:linear-gradient(135deg,#E8F4FF,#BFD4FF);display:flex;align-items:center;justify-content:center;font-size:42px">💎<br><span style="font-size:10px;color:var(--ink-2)">@阿K</span></div>
+            <div style="min-width:160px;height:120px;border-radius:12px;background:linear-gradient(135deg,#FFF3E6,#FFB6C1);display:flex;align-items:center;justify-content:center;font-size:42px">👑<br><span style="font-size:10px;color:var(--ink-2)">@柚子</span></div>
+          </div>
+
+          <div class="spacer-bottom" style="height:90px"></div>
+        </div>
+        <div class="action-bar">
+          <button class="ab-btn btn-blue" onclick="nav('page-product')">端盒购买 ¥899</button>
+          <button class="ab-btn btn-primary" onclick="nav('page-play-queue')">单抽试手气 ¥79</button>
+        </div>
+      </section>
+
+      <!-- ========== 直播列表 ========== -->
+      <section class="page" id="page-live">
+        <div class="scroll">
+          <div class="live-top"><span class="lt-t">潮玩直播</span><span onclick="toast('搜索直播间')">🔍</span></div>
+          <div class="live-cats" id="liveCats">
+            <span class="lc on" onclick="switchLiveCat(0)">全部</span>
+            <span class="lc" onclick="switchLiveCat(1)">真人开箱</span>
+            <span class="lc" onclick="switchLiveCat(2)">AI无人场</span>
+            <span class="lc" onclick="switchLiveCat(3)">新品首发</span>
+            <span class="lc" onclick="switchLiveCat(4)">隐藏款专场</span>
+            <span class="lc" onclick="switchLiveCat(5)">校园主播</span>
+          </div>
+
+          <div class="sec-title"><h3>🔴 正在直播</h3><span class="more">更多 ›</span></div>
+          <div class="live-grid">
+            <div class="live-card" onclick="openRoom()">
+              <div class="lcov" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)">
+                <span class="liveing">LIVE</span>
+                <span class="viewers">👁 2.3万</span>
+                <span class="ltype tag-blue">真人直播</span>
+                🧸
+              </div>
+              <div class="lc-info">
+                <div class="lc-title">LABUBU 新品首发 端盒送展示盒</div>
+                <div class="lc-host">😀 藏家阿K · <span class="verified-badge" style="border-radius:8px;font-size:9px">正品保障</span></div>
+              </div>
+            </div>
+            <div class="live-card" onclick="openRoom()">
+              <div class="lcov" style="background:linear-gradient(135deg,#E8F4FF,#BFD4FF)">
+                <span class="liveing">LIVE</span>
+                <span class="viewers">👁 1.1万</span>
+                <span class="ltype tag-green">AI 24h直播</span>
+                🐻
+              </div>
+              <div class="lc-info">
+                <div class="lc-title">DIMOO 星际 全系列开箱演示</div>
+                <div class="lc-host">🤖 AI主播 · <span class="verified-badge" style="border-radius:8px;font-size:9px">正品保障</span></div>
+              </div>
+            </div>
+            <div class="live-card" onclick="openRoom()">
+              <div class="lcov" style="background:linear-gradient(135deg,#F0EAFF,#D4C8FF)">
+                <span class="liveing">LIVE</span>
+                <span class="viewers">👁 8.6千</span>
+                <span class="ltype tag-blue">真人直播</span>
+                👾
+              </div>
+              <div class="lc-info">
+                <div class="lc-title">SKULLPANDA 隐藏款专场</div>
+                <div class="lc-host">😎 校园柚子 · <span class="student-badge">校园主播</span></div>
+              </div>
+            </div>
+            <div class="live-card" onclick="openRoom()">
+              <div class="lcov" style="background:linear-gradient(135deg,#E8FFF3,#B8FFD9)">
+                <span class="liveing">LIVE</span>
+                <span class="viewers">👁 5.2千</span>
+                <span class="ltype tag-green">AI 24h直播</span>
+                🐱
+              </div>
+              <div class="lc-info">
+                <div class="lc-title">CRYBABY 福袋抽奖不停</div>
+                <div class="lc-host">🤖 AI主播 · <span class="verified-badge" style="border-radius:8px;font-size:9px">正品保障</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 直播预告 -->
+          <div class="sec-title"><h3>📅 直播预告</h3><span class="more">更多 ›</span></div>
+          <div class="preview-row">
+            <div class="pv-card">
+              <div class="pvc-top" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)"><span class="ptag">新品首发</span>🧸</div>
+              <div class="pvc-info"><div class="pvc-title">LABUBU 联名大娃首发</div><div class="pvc-time">今晚 20:00 开播</div><div class="pvc-btn" onclick="this.textContent='已预约 ✓';this.classList.add('on')">预约开播提醒</div></div>
+            </div>
+            <div class="pv-card">
+              <div class="pvc-top" style="background:linear-gradient(135deg,#F5B50A,#FF6A2C)"><span class="ptag">隐藏专场</span>👑</div>
+              <div class="pvc-info"><div class="pvc-title">绝版大娃竞拍专场</div><div class="pvc-time">明日 19:00 开播</div><div class="pvc-btn" onclick="this.textContent='已预约 ✓';this.classList.add('on')">预约开播提醒</div></div>
+            </div>
+            <div class="pv-card">
+              <div class="pvc-top" style="background:linear-gradient(135deg,#22C55E,#0E2A6E)"><span class="ptag">校园专场</span>🎓</div>
+              <div class="pvc-info"><div class="pvc-title">高校主播换娃大会</div><div class="pvc-time">周六 14:00 开播</div><div class="pvc-btn" onclick="this.textContent='已预约 ✓';this.classList.add('on')">预约开播提醒</div></div>
+            </div>
+          </div>
+
+          <!-- 直播回放 -->
+          <div class="sec-title"><h3>📼 直播回放</h3><span class="more">更多 ›</span></div>
+          <div class="live-grid">
+            <div class="live-card" onclick="toast('观看回放')">
+              <div class="lcov" style="background:linear-gradient(135deg,#FFE7D6,#FFCFA8)">🧸<span class="ltype tag-soft">回放</span></div>
+              <div class="lc-info"><div class="lc-title">LABUBU 心动系列开箱测评</div><div class="lc-host">😀 藏家阿K · 2.1万播放</div></div>
+            </div>
+            <div class="live-card" onclick="toast('观看回放')">
+              <div class="lcov" style="background:linear-gradient(135deg,#E8F4FF,#BFD4FF)">🐻<span class="ltype tag-soft">回放</span></div>
+              <div class="lc-info"><div class="lc-title">DIMOO 星际全套实拍对比</div><div class="lc-host">🤖 AI主播 · 1.5万播放</div></div>
+            </div>
+          </div>
+          <div class="spacer-bottom"></div>
+        </div>
+      </section>
+
+      <!-- ========== 直播间 ========== -->
+      <div class="room" id="roomView">
+        <div class="room-video">
+          <span class="host-emoji">🧸</span>
+          <div class="stand-display">
+            <div class="sd-item">🪧</div>
+            <div class="sd-item">🏅</div>
+            <div class="sd-item">📦</div>
+            <div class="sd-item">🧹</div>
+          </div>
+          <div class="room-top">
+            <div class="rt-host">
+              <span class="rt-av">😀</span>
+              <div><div class="rt-name">藏家阿K</div><div class="rt-tag">资深藏家</div></div>
+            </div>
+            <span class="rt-viewers">👁 2.3万</span>
+            <div class="rt-right">
+              <span class="rt-follow" onclick="this.textContent='已关注 ✓';this.style.background='var(--ink-3)'">+关注</span>
+              <span class="rt-close" onclick="closeRoom()">✕</span>
+            </div>
+          </div>
+          <div class="room-theme">LABUBU 新品首发 端盒送展示盒</div>
+          <div class="room-stock" id="roomStock">剩余 47 件</div>
+          <div class="limited-flash" id="limitedFlash" style="display:none">限量 200 件 售完绝版</div>
+        </div>
+        <div class="danmaku-area" id="danmaku">
+          <div class="dm-item"><span class="dm-u dm-new">✨ 新粉@小鹿：</span>这个隐藏款太好看！</div>
+          <div class="dm-item"><span class="dm-u dm-col">👑 藏家@阿K：</span>端盒不重复！</div>
+          <div class="dm-item"><span class="dm-u dm-vip">💎 会员@大魔王：</span>已下单3盒</div>
+        </div>
+        <div class="room-side">
+          <div class="rs" onclick="toast('领券中心')"><span>🎫</span><span class="rs-t">领券</span><span class="red-dot"></span></div>
+          <div class="rs" onclick="toast('福袋抽奖')"><span>🎁</span><span class="rs-t">福袋</span></div>
+          <div class="rs" onclick="nav('page-ipdetail')"><span>📚</span><span class="rs-t">图鉴</span></div>
+          <div class="rs" onclick="toast('进群送壁纸')"><span>💬</span><span class="rs-t">社群</span></div>
+        </div>
+        <div class="room-product-btn" onclick="openRoomSheet()">
+          🛒 查看本场商品 <span class="rpb-now">当前讲解中</span>
+        </div>
+        <div class="room-bottom">
+          <div class="quick-q">
+            <span class="qq" onclick="sendQ('隐藏款概率？')">隐藏款概率？</span>
+            <span class="qq" onclick="sendQ('端盒会重复吗？')">端盒重复？</span>
+            <span class="qq" onclick="sendQ('手办尺寸多大？')">尺寸多大？</span>
+            <span class="qq" onclick="sendQ('瑕疵怎么售后？')">瑕疵售后？</span>
+          </div>
+          <div class="room-input-row">
+            <div class="ri-box">说点什么…</div>
+            <span onclick="sendQ('666')" style="font-size:20px">❤️</span>
+          </div>
+        </div>
+
+        <!-- 直播商品弹窗 -->
+        <div class="room-sheet" id="roomSheet">
+          <div class="rs-handle"></div>
+          <div style="padding:6px 14px 0;font-size:15px;font-weight:800">本场商品</div>
+          <div class="room-ip-row">
+            <span class="rir on">单盒盲盒</span>
+            <span class="rir">端盒全套</span>
+            <span class="rir">大娃手办</span>
+            <span class="rir">挂件周边</span>
+          </div>
+          <div class="now-playing">📢 当前讲解：单盒盲盒</div>
+          <div class="rs-product">
+            <div class="rsp-img">🧸</div>
+            <div class="rsp-info">
+              <div class="rsp-name">LABUBU 心动系列 · 单盒盲盒</div>
+              <div class="rsp-meta">尺寸 8cm · PVC材质 · 含隐藏款概率<br><b>端盒优惠：¥899/套（原价¥1299）</b><br><span class="tag-red" style="font-size:10px">限量 200 件 绝版</span></div>
+              <div class="rsp-price">¥79</div>
+            </div>
+          </div>
+          <div class="rs-guarantee">
+            <div class="rsg-t">🛡️ 正品保障承诺</div>
+            <div class="rsg-items">
+              <span>正品盲盒</span>
+              <span>瑕疵补发</span>
+              <span>隐藏缺件赔付</span>
+              <span>七天无理由</span>
+              <span>一物一码溯源</span>
+            </div>
+          </div>
+          <div class="rs-action">
+            <div class="rsa" style="background:var(--blue-soft);color:var(--blue)" onclick="toast('已加入购物车')">加入购物车</div>
+            <div class="rsa" style="background:var(--orange);color:#fff" onclick="openDraw('直播间下单 · ¥79')">立即购买 ¥79</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 我的 ========== -->
+      <section class="page" id="page-me">
+        <div class="scroll">
+          <div class="me-top">
+            <div class="me-user">
+              <span class="mu-av">😀</span>
+              <div class="mu-info">
+                <div class="mu-name">小鹿快跑 <span class="mu-level">LV.8 资深藏家</span> <span class="mu-vip">VIP</span></div>
+                <div style="font-size:11px;opacity:.8;margin-top:3px">学生认证 ✓ · 潮鉴社校园版用户</div>
+              </div>
+              <div class="mu-icons"><span onclick="toast('设置')">⚙️</span><span onclick="toast('客服中心')">💬</span></div>
+            </div>
+            <div class="me-stats">
+              <div class="ms"><div class="n">6</div><div class="l">已收集IP</div></div>
+              <div class="ms"><div class="n">3</div><div class="l">隐藏款</div></div>
+              <div class="ms"><div class="n">1</div><div class="l">全套集齐</div></div>
+            </div>
+          </div>
+
+          <!-- 资产大盘 -->
+          <div class="asset-grid">
+            <div class="ag"><div class="agi" style="background:#FFF0E6">💰</div><div class="agn">积分</div><div class="agd">2,480</div></div>
+            <div class="ag"><div class="agi" style="background:#E8F4FF"><span class="red-dot"></span>🎫</div><div class="agn">抽盒券</div><div class="agd">3 张待用</div></div>
+            <div class="ag"><div class="agi" style="background:#F0EAFF">🍀</div><div class="agn">幸运值</div><div class="agd">86</div></div>
+            <div class="ag"><div class="agi" style="background:#FFF3E6">🔑</div><div class="agn">隐藏兑换券</div><div class="agd">1 张</div></div>
+          </div>
+
+          <!-- 收藏柜入口 -->
+          <div class="cabinet-entry" onclick="nav('page-cabinet')">
+            <span class="ce-deco">🧸</span>
+            <div class="ce-t">我的数字藏品图鉴</div>
+            <div class="ce-s">AR收藏柜 · 图鉴进度 · 成就体系</div>
+            <div class="ce-stats">
+              <div class="ces"><div class="n">24</div><div class="l">总藏品</div></div>
+              <div class="ces"><div class="n">69%</div><div class="l">全套进度</div></div>
+              <div class="ces"><div class="n">2</div><div class="l">绝版藏品</div></div>
+            </div>
+            <span class="ce-go">进入收藏柜 ›</span>
+          </div>
+
+          <!-- 订单履约 -->
+          <div class="order-box">
+            <div class="ob-h"><h4>📦 我的藏品盒柜</h4><span class="more" onclick="toast('全部订单')">全部 ›</span></div>
+            <div class="order-status">
+              <div class="os" onclick="toast('待付款 2 件')"><span class="osi">💰</span><span>待付款<span class="badge">2</span></span></div>
+              <div class="os" onclick="toast('待拆盒发货 1 件')"><span class="osi">🎁</span><span>待拆盒</span></div>
+              <div class="os" onclick="toast('待收货 3 件')"><span class="osi">🚚</span><span>待收货<span class="badge">3</span></span></div>
+              <div class="os" onclick="toast('待晒单 5 件')"><span class="osi">📸</span><span>待晒单<span class="badge">5</span></span></div>
+              <div class="os" onclick="toast('换娃中心')"><span class="osi">🤝</span><span>换娃/售后</span></div>
+            </div>
+          </div>
+
+          <!-- 工具区 -->
+          <div class="tool-box">
+            <div class="tb-title">交易服务</div>
+            <div class="tool-row">
+              <div class="tr" onclick="toast('IP订阅中心')"><span class="tri" style="background:#FFF0E6">🔔</span>IP订阅</div>
+              <div class="tr" onclick="toast('藏品足迹')"><span class="tri" style="background:#E8F4FF">👣</span>藏品足迹</div>
+              <div class="tr" onclick="openVerify()"><span class="tri" style="background:#F0EAFF">🛡️</span>正品溯源</div>
+              <div class="tr" onclick="toast('售后客服')"><span class="tri" style="background:#E8FFF3">💬</span>售后客服</div>
+            </div>
+            <div class="tb-title">成长内容</div>
+            <div class="tool-row">
+              <div class="tr" onclick="toast('藏家会员权益')"><span class="tri" style="background:#FFF3E6">👑</span>藏家会员</div>
+              <div class="tr" onclick="toast('我的预约')"><span class="tri" style="background:#E8F4FF">📅</span>我的预约</div>
+              <div class="tr" onclick="toast('创作者中心')"><span class="tri" style="background:#F0EAFF">🎬</span>创作者中心</div>
+              <div class="tr" onclick="toast('学生认证')"><span class="tri" style="background:#E8FFF3">🎓</span>学生认证</div>
+            </div>
+          </div>
+
+          <!-- 内容管理 -->
+          <div class="content-tabs" id="contentTabs">
+            <span class="ct on" onclick="switchContentTab(0)">我的晒单</span>
+            <span class="ct" onclick="switchContentTab(1)">我的收藏</span>
+            <span class="ct" onclick="switchContentTab(2)">浏览记录</span>
+            <span class="ct" onclick="switchContentTab(3)">我的合集</span>
+          </div>
+          <div class="content-list">
+            <div class="cl-item" onclick="nav('page-product')" style="background:#FFE7D6">🧸</div>
+            <div class="cl-item" onclick="nav('page-product')" style="background:#E8F4FF">💎</div>
+            <div class="cl-item" onclick="nav('page-product')" style="background:#F0EAFF">🌟</div>
+            <div class="cl-item" onclick="nav('page-product')" style="background:#E8FFF3">🚀</div>
+          </div>
+
+          <div class="spacer-bottom"></div>
+        </div>
+      </section>
+
+      <!-- ========== 收藏柜详情 ========== -->
+      <section class="page" id="page-cabinet">
+        <div class="scroll">
+          <div class="cab-ar">
+            <span class="cab-back" onclick="goBack()">‹</span>
+            <div class="cab-acts"><span class="a" onclick="toast('已分享')">↗</span></div>
+            🧸
+            <div class="cab-title"><div class="t1">我的数字藏品图鉴</div><div class="t2">AR 收藏柜 · 24 件藏品</div></div>
+          </div>
+
+          <div class="cab-summary">
+            <div class="cs-row">
+              <div class="csr"><div class="n">24</div><div class="l">总藏品</div></div>
+              <div class="csr"><div class="n">69%</div><div class="l">全套进度</div></div>
+              <div class="csr"><div class="n">3</div><div class="l">隐藏款</div></div>
+              <div class="csr"><div class="n">2</div><div class="l">绝版藏品</div></div>
+            </div>
+          </div>
+
+          <!-- 成套进度 -->
+          <div class="cab-section">
+            <h4>📊 成套进度</h4>
+            <div class="ip-prog-item">
+              <div class="ipi-h"><span class="ipn">LABUBU 心动系列</span><span class="ipr">9/13 (差4款)</span></div>
+              <div class="ipi-bar"><i style="width:69%"></i></div>
+            </div>
+            <div class="ip-prog-item">
+              <div class="ipi-h"><span class="ipn">DIMOO 星际探索</span><span class="ipr">5/11 (差6款)</span></div>
+              <div class="ipi-bar"><i style="width:45%"></i></div>
+            </div>
+            <div class="ip-prog-item">
+              <div class="ipi-h"><span class="ipn">SKULLPANDA 密语</span><span class="ipr">3/9 (差6款)</span></div>
+              <div class="ipi-bar"><i style="width:33%"></i></div>
+            </div>
+            <div class="ip-prog-item">
+              <div class="ipi-h"><span class="ipn">✅ CRYBABY 情绪</span><span class="ipr" style="color:var(--green)">已集齐 7/7</span></div>
+              <div class="ipi-bar"><i style="width:100%"></i></div>
+            </div>
+          </div>
+
+          <!-- 成就徽章墙 -->
+          <div class="cab-section">
+            <h4>🏆 成就徽章墙</h4>
+            <div class="badge-wall">
+              <div class="bw"><div class="bwi" style="background:linear-gradient(135deg,var(--gold),#FFD700)">✅</div><div class="bwl">全套集齐</div></div>
+              <div class="bw"><div class="bwi">👑</div><div class="bwl">隐藏款×3</div></div>
+              <div class="bw"><div class="bwi">💎</div><div class="bwl">绝版藏品</div></div>
+              <div class="bw locked"><div class="bwi">🔒</div><div class="bwl">典藏大师<br>(未解锁)</div></div>
+              <div class="bw"><div class="bwi">🎓</div><div class="bwl">校园认证</div></div>
+              <div class="bw"><div class="bwi">📸</div><div class="bwl">晒单达人</div></div>
+              <div class="bw locked"><div class="bwi">🔒</div><div class="bwl">端盒无重复<br>(未解锁)</div></div>
+              <div class="bw locked"><div class="bwi">🔒</div><div class="bwl">10个IP<br>(未解锁)</div></div>
+            </div>
+          </div>
+
+          <!-- 分享海报 -->
+          <div class="share-poster" onclick="toast('已生成收藏图鉴海报')">
+            <div class="sp-t">📸 生成专属收藏图鉴海报</div>
+            <div class="sp-s">一键分享至朋友圈 / 社群 / 晒单墙</div>
+            <div class="sp-btn">生成海报 ›</div>
+          </div>
+
+          <div class="spacer-bottom"></div>
+        </div>
+      </section>
+
+      </div><!-- /pages -->
+
+      <!-- 底部Tab栏 -->
+      <div class="tabbar" id="tabbar">
+        <div class="tab active" onclick="navTab('page-home',0)"><span class="ico">🏠</span>首页</div>
+        <div class="tab" onclick="navTab('page-guide',1)"><span class="ico">📖</span>IP图鉴</div>
+        <div class="tab" onclick="navTab('page-live',2)"><span class="ico">📺</span>直播</div>
+        <div class="tab" onclick="navTab('page-me',3)"><span class="ico">😀</span>我的</div>
+      </div>
+
+      <!-- 正品溯源弹窗 -->
+      <div class="overlay" id="verifyOverlay" onclick="closeVerify()">
+        <div class="sheet" onclick="event.stopPropagation()">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title">🛡️ 潮鉴正品 · 一物一码溯源</div>
+          <div style="font-size:13px;color:var(--ink-2);line-height:1.7;padding:0 4px">
+            每一件商品均附带唯一溯源码，扫码可查看从生产到收货的全链路信息：
+          </div>
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--blue-soft);border-radius:12px">
+              <span style="font-size:24px">🏭</span>
+              <div><span style="font-weight:700;font-size:13px">生产工厂信息</span><br><span style="font-size:11px;color:var(--ink-3)">品牌授权工厂 · 生产批次 · 原料溯源</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--blue-soft);border-radius:12px">
+              <span style="font-size:24px">📋</span>
+              <div><span style="font-weight:700;font-size:13px">质检合格报告</span><br><span style="font-size:11px;color:var(--ink-3)">第三方质检 · 合格率 · 安全标准</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--blue-soft);border-radius:12px">
+              <span style="font-size:24px">✅</span>
+              <div><span style="font-weight:700;font-size:13px">平台入库核验</span><br><span style="font-size:11px;color:var(--ink-3)">入库日期 · 核验人员 · 批次编号</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--blue-soft);border-radius:12px">
+              <span style="font-size:24px">🚚</span>
+              <div><span style="font-weight:700;font-size:13px">物流流转信息</span><br><span style="font-size:11px;color:var(--ink-3)">出库 → 中转 → 签收 · 全程可追踪</span></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--ink-3)">溯源码终身绑定 · 收货后扫码即刻查询</div>
+        </div>
+      </div>
+
+      <!-- 抽盒结果弹窗 -->
+      <div class="overlay" id="drawOverlay" onclick="closeDraw()">
+        <div class="sheet" onclick="event.stopPropagation()">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title" id="drawTitle">🎉 抽盒结果</div>
+          <div style="text-align:center;margin:20px 0">
+            <div style="font-size:80px;animation:float 2s ease-in-out infinite" id="drawEmoji">🧸</div>
+            <div style="font-size:16px;font-weight:800;margin-top:10px" id="drawName">LABUBU 心动 · 甜梦款</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:6px" id="drawHint">距离集齐全套还差 4 </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0">
+            <span class="chip tag-soft">已录入收藏柜</span>
+            <span class="chip tag-orange">同款互换 ›</span>
+            <span class="chip tag-blue">查看IP全系列</span>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <button class="btn btn-line" style="flex:1" onclick="closeDraw()">继续抽盒</button>
+            <button class="btn btn-primary" style="flex:1" onclick="nav('page-cabinet');closeDraw()">查看收藏柜</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="toastEl"></div>
+
+      <!-- Home Indicator -->
+      <div class="home-indicator"></div>
+
+    </div><!-- /screen -->
+  </div><!-- /phone -->
+</div><!-- /stage -->
+
+<script>
+// Page navigation system
+const pageHistory = ['page-home'];
+let currentPage = 'page-home';
+const tabPages = ['page-home','page-guide','page-live','page-me'];
+
+function nav(id) {
+  if (id === currentPage) return;
+  if (document.getElementById('roomView') && document.getElementById('roomView').classList.contains('show')) closeRoom();
+  const old = document.getElementById(currentPage);
+  const new_ = document.getElementById(id);
+  if (!new_) return;
+  old.classList.remove('active');
+  new_.classList.add('active','slide');
+  setTimeout(() => new_.classList.remove('slide'), 350);
+  currentPage = id;
+  if (!tabPages.includes(id)) pageHistory.push(id);
+  else { pageHistory.length = 0; pageHistory.push(id); }
+  updateTab(id);
+  updateStatusbar(id);
+}
+
+function goBack() {
+  if (pageHistory.length > 1) { pageHistory.pop(); nav(pageHistory[pageHistory.length-1]); }
+  else nav('page-home');
+}
+
+function navTab(id, idx) {
+  pageHistory.length = 0;
+  pageHistory.push(id);
+  const old = document.getElementById(currentPage);
+  const new_ = document.getElementById(id);
+  old.classList.remove('active');
+  new_.classList.add('active');
+  currentPage = id;
+  updateTab(id);
+  updateStatusbar(id);
+}
+
+function updateTab(id) {
+  const tabs = document.querySelectorAll('.tab');
+  const map = {'page-home':0,'page-guide':1,'page-live':2,'page-me':3};
+  tabs.forEach(t => t.classList.remove('active'));
+  if (map[id] !== undefined) tabs[map[id]].classList.add('active');
+}
+
+function updateStatusbar(id) {
+  const sb = document.getElementById('statusbar');
+  const darkPages = ['page-home','page-guide','page-live','page-me',
+    'page-play-queue','page-play-grade','page-play-instant','page-play-ming',
+    'page-cabinet','page-ipdetail'];
+  sb.classList.toggle('on-dark', darkPages.includes(id));
+}
+
+// Category tab switching
+function switchCat(idx) {
+  const tabs = document.querySelectorAll('#catTabs .ct');
+  tabs.forEach(t => t.classList.remove('on'));
+  tabs[idx].classList.add('on');
+  const panes = document.querySelectorAll('#catPanel .cat-pane');
+  panes.forEach(p => p.style.display = 'none');
+  panes[idx].style.display = 'block';
+}
+function switchGuideCat(idx) {
+  const tabs = document.querySelectorAll('#guideCats .gc');
+  tabs.forEach(t => t.classList.remove('on'));
+  tabs[idx].classList.add('on');
+}
+function switchLiveCat(idx) {
+  const tabs = document.querySelectorAll('#liveCats .lc');
+  tabs.forEach(t => t.classList.remove('on'));
+  tabs[idx].classList.add('on');
+}
+function switchContentTab(idx) {
+  const tabs = document.querySelectorAll('#contentTabs .ct');
+  tabs.forEach(t => t.classList.remove('on'));
+  tabs[idx].classList.add('on');
+}
+
+// Banner rotation
+let bannerIdx = 0;
+function rotateBanner() {
+  bannerIdx = (bannerIdx + 1) % 4;
+  document.getElementById('bannerTrack').style.transform = 'translateX(-' + bannerIdx*100 + '%)';
+  const dots = document.querySelectorAll('#bannerDots span');
+  dots.forEach(d => d.classList.remove('on'));
+  dots[bannerIdx].classList.add('on');
+}
+setInterval(rotateBanner, 4000);
+
+// Countdown timers
+let newbieSec = 2*3600+48*60+59;
+function updateNewbieCd() {
+  newbieSec--;
+  if (newbieSec < 0) newbieSec = 86400;
+  const h = Math.floor(newbieSec/3600);
+  const m = Math.floor((newbieSec%3600)/60);
+  const s = newbieSec%60;
+  document.getElementById('newbieCd').textContent =
+    String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+setInterval(updateNewbieCd, 1000);
+
+let queueSec = 14*60+59;
+function updateQueueCd() {
+  queueSec--;
+  if (queueSec < 0) queueSec = 900;
+  const m = Math.floor(queueSec/60);
+  const s = queueSec%60;
+  const el = document.getElementById('queueCd');
+  if (el) el.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+setInterval(updateQueueCd, 1000);
+
+// Box cabinet selection
+function pickBox(el) {
+  document.querySelectorAll('#boxGrid .box-cell').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Spec selection
+function pickSpec(el) {
+  document.querySelectorAll('.spec-row .sp').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// Favorite toggle
+function toggleFav(el) {
+  if (el.textContent.trim() === '🤍') { el.textContent = '❤️'; toast('已收藏'); }
+  else { el.textContent = '🤍'; toast('已取消收藏'); }
+}
+
+// Toast notification
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// Verified popup
+function openVerify() { document.getElementById('verifyOverlay').classList.add('show'); }
+function closeVerify() { document.getElementById('verifyOverlay').classList.remove('show'); }
+
+// Draw result popup
+const drawResults = [
+  {emoji:'🧸',name:'LABUBU 心动 · 甜梦款',hint:'距离集齐全套还差 4 款'},
+  {emoji:'💎',name:'DIMOO 星际 · 隐藏款',hint:'恭喜获得隐藏款！'},
+  {emoji:'🌟',name:'SKULLPANDA · 稀有色款',hint:'距离集齐全套还差 3 款'},
+  {emoji:'🧸',name:'LABUBU 心动 · 星愿款',hint:'距离集齐全套还差 3 款'},
+  {emoji:'👑',name:'终极大赏 · 绝版大娃',hint:'恭喜获得终极大赏！'},
+];
+function openDraw(label) {
+  const r = drawResults[Math.floor(Math.random()*drawResults.length)];
+  document.getElementById('drawEmoji').textContent = r.emoji;
+  document.getElementById('drawName').textContent = r.name;
+  document.getElementById('drawHint').textContent = r.hint;
+  document.getElementById('drawTitle').textContent = '🎉 ' + label;
+  document.getElementById('drawOverlay').classList.add('show');
+}
+function closeDraw() { document.getElementById('drawOverlay').classList.remove('show'); }
+
+// Live room
+function openRoom() {
+  document.getElementById('roomView').classList.add('show');
+  startDanmaku();
+  flashLimited();
+  updateRoomStock();
+}
+function closeRoom() {
+  document.getElementById('roomView').classList.remove('show');
+  document.getElementById('roomSheet').classList.remove('show');
+  stopDanmaku();
+  clearInterval(roomStockInterval);
+}
+function openRoomSheet() { document.getElementById('roomSheet').classList.add('show'); }
+
+let roomStockNum = 47, roomStockInterval;
+function updateRoomStock() {
+  roomStockInterval = setInterval(() => {
+    roomStockNum--;
+    if (roomStockNum < 10) roomStockNum = 200;
+    const el = document.getElementById('roomStock');
+    if (el) el.textContent = '剩余 ' + roomStockNum + ' 件';
+  }, 3000);
+}
+
+let flashTimer;
+function flashLimited() {
+  const el = document.getElementById('limitedFlash');
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+  clearInterval(flashTimer);
+  flashTimer = setInterval(() => {
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+  }, 15000);
+}
+
+const dmMsgs = [
+  {user:'新粉@小星',type:'dm-new',msg:'这个隐藏款太美！'},
+  {user:'藏家@阿K',type:'dm-col',msg:'端盒不重复！'},
+  {user:'会员@大魔王',type:'dm-vip',msg:'已下单3盒'},
+  {user:'新粉@小白',type:'dm-new',msg:'第一次抽盒求欧气'},
+  {user:'藏家@月月',type:'dm-col',msg:'隐藏款概率1/144'},
+  {user:'会员@柚子',type:'dm-vip',msg:'学生价真划算'},
+  {user:'新粉@阿飞',type:'dm-new',msg:'直播间讲解很详细'},
+  {user:'藏家@鹿鹿',type:'dm-col',msg:'瑕疵补发很靠谱'},
+];
+let dmTimer;
+function startDanmaku() {
+  dmTimer = setInterval(() => {
+    const area = document.getElementById('danmaku');
+    const m = dmMsgs[Math.floor(Math.random()*dmMsgs.length)];
+    const div = document.createElement('div');
+    div.className = 'dm-item';
+    div.innerHTML = '<span class="dm-u '+m.type+'">'+m.user+'：</span>'+m.msg;
+    area.insertBefore(div, area.firstChild);
+    if (area.children.length > 8) area.removeChild(area.lastChild);
+  }, 2000);
+}
+function stopDanmaku() { clearInterval(dmTimer); }
+function sendQ(msg) { toast('已发送：' + msg); }
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  document.getElementById('clock').textContent = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+// Initialize
+updateStatusbar('page-home');
+</script>
+</body>
+</html>
