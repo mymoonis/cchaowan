@@ -489,6 +489,369 @@ img{display:block;max-width:100%;}
 .share-poster .sp-s{font-size:11px;opacity:.9;margin-top:4px;}
 .share-poster .sp-btn{margin-top:12px;background:#fff;color:var(--orange);display:inline-block;padding:8px 18px;border-radius:18px;font-size:12px;font-weight:700;}
 .spacer-bottom{height:90px;}
+
+/* ==================== 响应式设计 - 移动端适配 ==================== */
+@media screen and (max-width: 480px) {
+  /* 移除手机外框，让内容充满整个屏幕 */
+  .stage {
+    background: var(--bg);
+    padding: 0;
+  }
+
+  .phone {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    position: relative;
+    inset: 0;
+  }
+
+  .phone::before,
+  .phone::after,
+  .vol-r {
+    display: none;
+  }
+
+  .screen {
+    inset: 0;
+    border-radius: 0;
+  }
+
+  /* 调整状态栏和安全区域 */
+  .statusbar {
+    height: 44px;
+    padding: 0 16px;
+  }
+
+  .island {
+    display: none;
+  }
+
+  .home-indicator {
+    bottom: 8px;
+  }
+
+  /* 调整内容间距 */
+  .home-top {
+    padding: 44px 12px 12px;
+  }
+
+  .banner {
+    margin: 10px;
+    border-radius: 12px;
+    height: 140px;
+  }
+
+  .grid4,
+  .hero-card,
+  .newbie-cards,
+  .cat-panel,
+  .prize-grid,
+  .ming-grid,
+  .show-wall {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  /* 调整网格布局 */
+  .grid4 {
+    gap: 8px;
+    padding: 10px 6px;
+  }
+
+  .grid4 .item .gi {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .box-grid {
+    gap: 10px;
+  }
+
+  .style-grid {
+    gap: 10px;
+  }
+
+  .play-grid {
+    gap: 12px;
+  }
+
+  /* 调整字体大小 */
+  .sec-title h3 {
+    font-size: 15px;
+  }
+
+  .hero-info .h-name {
+    font-size: 14px;
+  }
+
+  .hero-info .h-price {
+    font-size: 16px;
+  }
+
+  /* 调整按钮和操作栏 */
+  .action-bar {
+    padding: 8px 12px 20px;
+  }
+
+  .pd-action {
+    padding: 8px 12px 20px;
+  }
+
+  .tabbar {
+    height: 70px;
+    padding-bottom: 12px;
+  }
+
+  /* 直播间适配 */
+  .room-top {
+    padding: 44px 12px 10px;
+  }
+
+  .room-bottom {
+    padding: 10px 12px 20px;
+  }
+
+  .room-product-btn {
+    bottom: 75px;
+  }
+
+  /* 个人中心适配 */
+  .me-top {
+    padding: 44px 12px 18px;
+  }
+
+  .asset-grid {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .cabinet-entry {
+    margin: 10px;
+  }
+
+  .order-box,
+  .tool-box {
+    margin: 0 10px 10px;
+  }
+
+  /* 商品详情页适配 */
+  .pd-banner {
+    height: 280px;
+    font-size: 100px;
+  }
+
+  .pd-banner .pd-back,
+  .pd-banner .pd-acts .a {
+    top: 44px;
+  }
+
+  /* IP图鉴适配 */
+  .guide-top {
+    padding: 44px 12px 14px;
+  }
+
+  .guide-grid {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  /* IP详情适配 */
+  .ipd-banner {
+    height: 240px;
+  }
+
+  .ipd-banner .ipd-back,
+  .ipd-banner .ipd-acts {
+    top: 44px;
+  }
+
+  .ipd-banner .ipd-emoji {
+    font-size: 80px;
+    top: 50px;
+  }
+
+  /* 收藏柜适配 */
+  .cab-ar {
+    height: 180px;
+    font-size: 80px;
+  }
+
+  .cab-ar .cab-back,
+  .cab-ar .cab-acts {
+    top: 44px;
+  }
+
+  /* 直播列表适配 */
+  .live-top {
+    padding: 44px 12px 12px;
+  }
+
+  .live-grid {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  /* 抽盒页面适配 */
+  .play-head {
+    padding: 44px 12px 14px;
+  }
+
+  .countdown-bar,
+  .box-cabinet,
+  .grade-section,
+  .record-roll,
+  .pool-bar {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .float-side {
+    bottom: 120px;
+  }
+
+  /* 弹窗适配 */
+  .sheet {
+    max-height: 85%;
+    padding: 16px 16px 24px;
+  }
+
+  .overlay {
+    align-items: flex-end;
+  }
+}
+
+/* 小屏手机适配 (iPhone SE 等) */
+@media screen and (max-width: 360px) {
+  .grid4 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 8px 4px;
+  }
+
+  .grid4 .item {
+    font-size: 10px;
+  }
+
+  .grid4 .item .gi {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .box-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .style-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .banner {
+    height: 120px;
+  }
+
+  .hero-img {
+    height: 150px;
+    font-size: 60px;
+  }
+
+  .live-grid {
+    gap: 8px;
+  }
+
+  .live-card .lcov {
+    height: 120px;
+    font-size: 48px;
+  }
+
+  .guide-grid {
+    gap: 8px;
+  }
+
+  .ip-card .ic-cover {
+    height: 110px;
+    font-size: 50px;
+  }
+
+  .asset-grid .ag .agi {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+
+  .me-user .mu-av {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .me-user .mu-name {
+    font-size: 15px;
+  }
+}
+
+/* 横屏适配 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .statusbar {
+    height: 32px;
+  }
+
+  .home-top {
+    padding: 32px 12px 8px;
+  }
+
+  .tabbar {
+    height: 60px;
+    padding-bottom: 10px;
+  }
+
+  .banner {
+    height: 100px;
+  }
+
+  .home-indicator {
+    display: none;
+  }
+
+  .room-video .host-emoji {
+    font-size: 80px;
+  }
+
+  .pd-banner {
+    height: 200px;
+    font-size: 80px;
+  }
+}
+
+/* 大屏幕设备 (平板及以上) - 保持原有手机框架样式 */
+@media screen and (min-width: 481px) {
+  .stage {
+    background: radial-gradient(circle at 50% 30%,#1c1c28,#0a0a0f 70%);
+  }
+
+  .phone {
+    width: 393px;
+    height: 852px;
+    border-radius: 54px;
+    box-shadow: 0 0 0 12px #1a1a22, 0 0 0 14px #2a2a36, 0 40px 80px rgba(0,0,0,.6), 0 0 60px rgba(40,60,160,.25);
+  }
+
+  .phone::before,
+  .phone::after,
+  .vol-r {
+    display: block;
+  }
+
+  .screen {
+    inset: 8px;
+    border-radius: 46px;
+  }
+}
 </style>
 </head>
 <body>
